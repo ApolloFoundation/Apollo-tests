@@ -1,0 +1,10 @@
+{
+  "simulation": "com.apollocurrency.PerformanceSimulation",
+  "simulationId": "performancesimulation",
+  "start": 1587647127677,
+  "description": "",
+  "scenarios": ["Send Money"],
+  "assertions": [
+
+  ]
+}
