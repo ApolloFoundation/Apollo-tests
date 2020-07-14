@@ -2,19 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>apollo-wallet</artifactId>
-    <groupId>com.apollocurrency</groupId>
-    <version>1.42.9</version>
-  </parent>
+
+  <groupId>apl-performance-tests</groupId>
+  <artifactId>apl-performance-tests</artifactId>
+  <version>1</version>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>apl-performance-tests</artifactId>
   <properties>
     <aspectj.version>1.9.4</aspectj.version>
-    <test.env>n2</test.env>
-    <users>10</users>
-    <duration>2</duration>
+    <test.env>localhost</test.env>
+    <users>25</users>
+    <duration>10</duration>
   </properties>
 
   <dependencies>
