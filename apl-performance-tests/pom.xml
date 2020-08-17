@@ -10,7 +10,7 @@
 
   <properties>
     <aspectj.version>1.9.4</aspectj.version>
-    <test.env>http://51.15.104.205:7876</test.env>
+    <test.env>http://localhost:7876</test.env>
     <users>25</users>
     <duration>10</duration>
   </properties>
