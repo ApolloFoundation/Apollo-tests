@@ -15,7 +15,7 @@ class PerformanceSendMoney extends Simulation {
 	val env: String = System.getProperty("test.env")
 	val users = System.getProperty("users").toDouble
 	val duration = System.getProperty("duration").toDouble
-	val childAccounts = ConfigFactory.load("application.conf").getString("childAccountsReq")
+//	val childAccounts = ConfigFactory.load("application.conf").getString("childAccountsReq")
 	var childPass = ConfigFactory.load("application.conf").getStringList("childPass").asScala.toList
 	val parent = ConfigFactory.load("application.conf").getString("parent")
 	val psecret = ConfigFactory.load("application.conf").getString("psecret")
@@ -26,8 +26,7 @@ class PerformanceSendMoney extends Simulation {
 
 	before {
 		println("Start forging!")
-		print(childPass.size)
-    print(gson.toJson(new SetChildReq(parent,psecret,childPass)))
+
   	try {
 					val forgingResponse = Http(env+"/apl")
 						.postForm
@@ -36,9 +35,10 @@ class PerformanceSendMoney extends Simulation {
 				     println(forgingResponse.body)
 
 		    	val setChildAccountsResponse = Http(env+"/rest/v2/account/test")
-				    .postData(childAccounts).header("content-type", "application/json").asString
+				    .postData(gson.toJson(new SetChildReq(parent,psecret,childPass.asJava))).header("content-type", "application/json").asString
 
 		     	val trxByte = JSON.parseFull(setChildAccountsResponse.body).get.asInstanceOf[Map[String, Any]]("tx")
+
 
 			    val broadcastResponse = Http(env+"/apl")
 				     .postForm
@@ -69,26 +69,17 @@ class PerformanceSendMoney extends Simulation {
 			.post("/rest/v2/account/money")
 			.body(StringBody(gson.toJson(new SendMoneyReq(parent,psecret,"${csecret}", "${SenderAccountRS}","${accountRS}", (random.nextInt(100) + 1)+"00000000"))
 			)).asJson
-			.check(jsonPath("$.tx").find.saveAs("tx"))
-		  .check(bodyString.saveAs("BODY")))
+			.check(jsonPath("$.tx").find.saveAs("tx")))
 	.exec (session =>{
-		val response = session("BODY").as[String]
 		val tx = session("tx").as[String]
 		//println(tx)
-		//println(s"Response body: $response")
 		session
 		})
 		.exec(http("Broadcast Transaction")
 			.post("/apl?" +
 				"requestType=broadcastTransaction&" +
 				"transactionBytes=${tx}")
-			.check(bodyString.saveAs("BODY1"))
-			.check(jsonPath("$.errorDescription").notExists.saveAs("errorDescription"))
-		).exec (session =>{
-		val response = session("BODY1").as[String]
-		println(s"Response body: $response")
-		session
-	})
+			.check(jsonPath("$.errorDescription").notExists.saveAs("errorDescription")))
 
 	val inject =	constantUsersPerSec(users) during (duration minutes)
 
@@ -98,15 +89,5 @@ class PerformanceSendMoney extends Simulation {
 
 class SendMoneyReq(var parent: String,var psecret: String,var csecret: String,var sender: String,var recipient: String,var amount: String) {
 }
-class SetChildReq(var parent: String,var psecret: String,var child_secret_list: List[String]) {
+class SetChildReq(var parent: String,var psecret: String,val child_secret_list: java.util.List[String]) {
 }
-
-
-
-
-
-
-
-
-
-
