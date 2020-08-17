@@ -1,15 +1,13 @@
-package com.apollocurrency
+import java.util.UUID.randomUUID
 
 import com.typesafe.config.ConfigFactory
-import collection.JavaConverters._
-import scala.concurrent.duration._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import io.gatling.jdbc.Predef._
-import scala.util.Random
 import scalaj.http._
-import java.util.UUID.randomUUID
-import java.util.concurrent.TimeUnit
+
+import scala.collection.JavaConverters._
+import scala.concurrent.duration._
+import scala.util.Random
 
 
 class PerformanceSimulation extends Simulation {
@@ -142,4 +140,41 @@ class PerformanceSimulation extends Simulation {
 	    scn_1.inject(inject_ramp),
       scn_2.inject(inject_ramp)
 	).protocols(httpProtocol)
+}
+
+
+class CreateTransactionRequest{
+
+	val deadlineValue = null
+	val referencedTransactionFullHash = null
+	val secretPhrase = null
+	val publicKeyValue = null
+	val passphrase = null
+
+	val broadcast = false
+	val validate = false
+	val timestamp = 0
+	val credential = null
+	val version = null
+
+	val encryptedMessageIsPrunable = false
+	val messageIsPrunable = false
+	val appendix = null
+
+	val message = null
+	val encryptToSelfMessage = null
+	val phased = false
+	val phasing = null
+
+	val senderAccount = null
+	val recipientId = 0L
+	val recipientPublicKey = null
+
+	val feeATM = 0L
+	val amountATM = 0L
+	val ecBlockHeight = 0
+	val ecBlockId = 0L
+	val publicKey = null
+	val keySeed = null
+	val attachment = null
 }
