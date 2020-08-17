@@ -64,24 +64,23 @@ class PerformanceSendMoney extends Simulation {
 
 	val scn = scenario("Send Money")
 		.exec {session =>
-			session.set("csecret",1)
+			session.set("csecret",random.nextInt(999)+100000)
 		}
 		.exec(http("Get Recipient Account Id")
 			.post("/apl?requestType=getAccountId&secretPhrase="+(random.nextInt(999)+100000).toString)
 			.check(status.is(200))
 			.check(jsonPath("$.accountRS").find.saveAs("accountRS")))
 		.exec(http("Get Sender Account Id")
-			.post("/apl?requestType=getAccountId&secretPhrase="+(random.nextInt(999)+100000).toString)
+			.post("/apl?requestType=getAccountId&secretPhrase=${csecret}")
 			.check(status.is(200))
 			.check(jsonPath("$.accountRS").find.saveAs("SenderAccountRS")))
 		.exec(http("Send Money v2")
 			.post("/rest/v2/account/money")
-			.body(StringBody(gson.toJson(new SendMoneyReq((random.nextInt(999) + 100000), "${SenderAccountRS}","${accountRS}", random.nextInt(800) + 1))
+			.body(StringBody(gson.toJson(new SendMoneyReq("${csecret}", "${SenderAccountRS}","${accountRS}", (random.nextInt(800) + 1)+"00000000"))
 			)).asJson
 			.check(jsonPath("$.tx").find.saveAs("tx"))
 		  .check(bodyString.saveAs("BODY")))
 	.exec (session =>{
-		println(session("csecret").as[Int])
 		val response = session("BODY").as[String]
 		val tx = session("tx").as[String]
 		//println(tx)
@@ -96,7 +95,7 @@ class PerformanceSendMoney extends Simulation {
 			.check(jsonPath("$.errorDescription").notExists.saveAs("errorDescription"))
 		).exec (session =>{
 		val response = session("BODY1").as[String]
-		//println(s"Response body: $response")
+		println(s"Response body: $response")
 		session
 	})
 
@@ -106,7 +105,7 @@ class PerformanceSendMoney extends Simulation {
 
 }
 
-class SendMoneyReq(var csecret: Int,var sender: String,var recipient: String,var amount: Int) {
+class SendMoneyReq(var csecret: String,var sender: String,var recipient: String,var amount: String) {
   val parent = "APL-X5JH-TJKJ-DVGC-5T2V8"
 	val psecret = "1"
 }
