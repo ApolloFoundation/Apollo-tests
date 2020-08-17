@@ -28,6 +28,8 @@ class PerformanceSendMoney extends Simulation {
 	val users = System.getProperty("users").toDouble
 	val duration = System.getProperty("duration").toDouble
 	val childAccounts = ConfigFactory.load("application.conf").getString("childAccountsReq")
+	val parent = ConfigFactory.load("application.conf").getString("parent")
+	val psecret = ConfigFactory.load("application.conf").getString("psecret")
 	val ONE_APL = 100000000
 
 	val httpProtocol = http.baseUrl(env)
@@ -76,7 +78,7 @@ class PerformanceSendMoney extends Simulation {
 			.check(jsonPath("$.accountRS").find.saveAs("SenderAccountRS")))
 		.exec(http("Send Money v2")
 			.post("/rest/v2/account/money")
-			.body(StringBody(gson.toJson(new SendMoneyReq("${csecret}", "${SenderAccountRS}","${accountRS}", (random.nextInt(800) + 1)+"00000000"))
+			.body(StringBody(gson.toJson(new SendMoneyReq(parent,psecret,"${csecret}", "${SenderAccountRS}","${accountRS}", (random.nextInt(100) + 1)+"00000000"))
 			)).asJson
 			.check(jsonPath("$.tx").find.saveAs("tx"))
 		  .check(bodyString.saveAs("BODY")))
@@ -105,9 +107,7 @@ class PerformanceSendMoney extends Simulation {
 
 }
 
-class SendMoneyReq(var csecret: String,var sender: String,var recipient: String,var amount: String) {
-  val parent = "APL-X5JH-TJKJ-DVGC-5T2V8"
-	val psecret = "1"
+class SendMoneyReq(var parent: String,var psecret: String,var csecret: String,var sender: String,var recipient: String,var amount: String) {
 }
 
 
