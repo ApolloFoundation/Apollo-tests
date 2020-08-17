@@ -1,24 +1,12 @@
-package com.apollocurrency
-
-import java.nio.ByteBuffer
-
-import com.apollocurrency.aplwallet.apl.core.entity.blockchain.Transaction
-import com.apollocurrency.aplwallet.apl.core.entity.state.account.Account
-import com.apollocurrency.aplwallet.apl.core.model.CreateTransactionRequest
-import com.apollocurrency.aplwallet.apl.core.rest.TransactionCreator
-import com.apollocurrency.aplwallet.apl.core.service.state.account.AccountService
-import com.apollocurrency.aplwallet.apl.core.transaction.messages.{Appendix, Attachment, EncryptToSelfMessageAppendix, PhasingAppendix}
-import com.apollocurrency.aplwallet.apl.crypto.{Convert, Crypto}
-
 import scala.concurrent.duration._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scalaj.http._
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.config.ConfigFactory
 import scala.util.parsing.json._
 import scala.util.Random
 import com.google.gson.Gson
+import scala.collection.JavaConverters._
 
 class PerformanceSendMoney extends Simulation {
 
@@ -28,17 +16,18 @@ class PerformanceSendMoney extends Simulation {
 	val users = System.getProperty("users").toDouble
 	val duration = System.getProperty("duration").toDouble
 	val childAccounts = ConfigFactory.load("application.conf").getString("childAccountsReq")
+	var childPass = ConfigFactory.load("application.conf").getStringList("childPass").asScala.toList
 	val parent = ConfigFactory.load("application.conf").getString("parent")
 	val psecret = ConfigFactory.load("application.conf").getString("psecret")
 	val ONE_APL = 100000000
-
 	val httpProtocol = http.baseUrl(env)
 
 
 
 	before {
 		println("Start forging!")
-
+		print(childPass.size)
+    print(gson.toJson(new SetChildReq(parent,psecret,childPass)))
   	try {
 					val forgingResponse = Http(env+"/apl")
 						.postForm
@@ -108,6 +97,8 @@ class PerformanceSendMoney extends Simulation {
 }
 
 class SendMoneyReq(var parent: String,var psecret: String,var csecret: String,var sender: String,var recipient: String,var amount: String) {
+}
+class SetChildReq(var parent: String,var psecret: String,var child_secret_list: List[String]) {
 }
 
 
