@@ -55,10 +55,10 @@ class PerformanceSendMoney extends Simulation {
 
 	val scn = scenario("Send Money")
 		.exec {session =>
-			session.set("csecret",random.nextInt(999)+100000)
+			session.set("csecret",random.nextInt(99)+100000)
 		}
 		.exec(http("Get Recipient Account Id")
-			.post("/apl?requestType=getAccountId&secretPhrase="+(random.nextInt(999)+100000).toString)
+			.post("/apl?requestType=getAccountId&secretPhrase="+(random.nextInt(99)+100000).toString)
 			.check(status.is(200))
 			.check(jsonPath("$.accountRS").find.saveAs("accountRS")))
 		.exec(http("Get Sender Account Id")
