@@ -15,6 +15,7 @@
     <test.env>n2</test.env>
     <users>10</users>
     <duration>2</duration>
+    <forging>none</forging>
   </properties>
 
   <dependencies>
@@ -53,6 +54,7 @@
             <jvmArg>-Dusers=${users}</jvmArg>
             <jvmArg>-Dduration=${duration}</jvmArg>
             <jvmArg>-Dtest.env=${test.env}</jvmArg>
+            <jvmArg>-Dforging=${forging}</jvmArg>
           </jvmArgs>
         </configuration>
       </plugin>

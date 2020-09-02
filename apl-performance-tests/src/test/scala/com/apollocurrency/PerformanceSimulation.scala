@@ -17,6 +17,7 @@ class PerformanceSimulation extends Simulation {
 	val env: String = System.getProperty("test.env")
 	val users = System.getProperty("users").toDouble
 	val duration = System.getProperty("duration").toDouble
+	val forging = System.getProperty("none").toString
 
 	var peers = ConfigFactory.load("application.conf").getStringList(env).asScala.toList
 	val random = new Random
@@ -24,36 +25,37 @@ class PerformanceSimulation extends Simulation {
 
 
 	before {
-
-		println("Stop/Start forging!")
-		for (peer <- peers) {
-			try {
-			println(peer)
-			val response = Http(peer+"/apl")
-				.postForm
-				.param("requestType","stopForging")
-  			.param("adminPassword","1").asString
-		   	 println(response.body)
-			} catch { case e: Exception =>
-				println(e.getMessage)
+			println("Stop/Start forging!")
+			for (peer <- peers) {
+				try {
+					println(peer)
+					val response = Http(peer + "/apl")
+						.postForm
+						.param("requestType", "stopForging")
+						.param("adminPassword", "1").asString
+					println(response.body)
+				} catch {
+					case e: Exception =>
+						println(e.getMessage)
+				}
 			}
-		 }
 
-		for( i <- 1 to 200) {
+			for (i <- 1 to 200) {
 				try {
 					val peer = peers(
 						random.nextInt(peers.length)
 					)
 					println(peer)
-					val response = Http(peer+"/apl")
+					val response = Http(peer + "/apl")
 						.postForm
-						.param("requestType","startForging")
-						.param("secretPhrase",i.toString).asString
+						.param("requestType", "startForging")
+						.param("secretPhrase", i.toString).asString
 					println(response.body)
-					} catch { case e: Exception =>
+				} catch {
+					case e: Exception =>
 						println(e.getMessage)
-					}
 				}
+			}
 	}
 
 
