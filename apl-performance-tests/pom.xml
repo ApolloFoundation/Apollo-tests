@@ -15,7 +15,7 @@
     <test.env>n2</test.env>
     <users>10</users>
     <duration>2</duration>
-    <forging>none</forging>
+    <forging>false</forging>
   </properties>
 
   <dependencies>
