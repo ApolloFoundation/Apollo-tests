@@ -12,9 +12,11 @@
   <artifactId>apl-performance-tests</artifactId>
   <properties>
     <aspectj.version>1.9.4</aspectj.version>
+    <custompeer>""</custompeer>
     <test.env>n2</test.env>
     <users>10</users>
     <duration>2</duration>
+    <forging>false</forging>
   </properties>
 
   <dependencies>
@@ -53,6 +55,8 @@
             <jvmArg>-Dusers=${users}</jvmArg>
             <jvmArg>-Dduration=${duration}</jvmArg>
             <jvmArg>-Dtest.env=${test.env}</jvmArg>
+            <jvmArg>-Dforging=${forging}</jvmArg>
+            <jvmArg>-Dcustompeer=${custompeer}</jvmArg>
           </jvmArgs>
         </configuration>
       </plugin>

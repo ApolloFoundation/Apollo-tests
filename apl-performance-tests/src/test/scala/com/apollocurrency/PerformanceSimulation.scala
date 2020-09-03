@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.jdbc.Predef._
+import io.gatling.http.protocol.HttpProtocolBuilder
 import scala.util.Random
 import scalaj.http._
 import java.util.UUID.randomUUID
@@ -15,45 +16,50 @@ import java.util.concurrent.TimeUnit
 class PerformanceSimulation extends Simulation {
 
 	val env: String = System.getProperty("test.env")
-	val users = System.getProperty("users").toDouble
+	val users = System.getProperty("users").toInt
 	val duration = System.getProperty("duration").toDouble
+	val forging = System.getProperty("forging").toBoolean
+	val custompeer = System.getProperty("custompeer").toString
 
 	var peers = ConfigFactory.load("application.conf").getStringList(env).asScala.toList
 	val random = new Random
-	val httpProtocol = http.baseUrls(peers)
+	val httpProtocol = getPeers(custompeer)
 
 
 	before {
+		 if (forging) {
+			 println("Stop/Start forging!")
+			 for (peer <- peers) {
+				 try {
+					 println(peer)
+					 val response = Http(peer + "/apl")
+						 .postForm
+						 .param("requestType", "stopForging")
+						 .param("adminPassword", "1").asString
+					 println(response.body)
+				 } catch {
+					 case e: Exception =>
+						 println(e.getMessage)
+				 }
+			 }
 
-		println("Stop/Start forging!")
-		for (peer <- peers) {
-			try {
-			println(peer)
-			val response = Http(peer+"/apl")
-				.postForm
-				.param("requestType","stopForging")
-  			.param("adminPassword","1").asString
-		   	 println(response.body)
-			} catch { case e: Exception =>
-				println(e.getMessage)
-			}
+			 for (i <- 1 to 200) {
+				 try {
+					 val peer = peers(
+						 random.nextInt(peers.length)
+					 )
+					 println(peer)
+					 val response = Http(peer + "/apl")
+						 .postForm
+						 .param("requestType", "startForging")
+						 .param("secretPhrase", i.toString).asString
+					 println(response.body)
+				 } catch {
+					 case e: Exception =>
+						 println(e.getMessage)
+				 }
+			 }
 		 }
-
-		for( i <- 1 to 200) {
-				try {
-					val peer = peers(
-						random.nextInt(peers.length)
-					)
-					println(peer)
-					val response = Http(peer+"/apl")
-						.postForm
-						.param("requestType","startForging")
-						.param("secretPhrase",i.toString).asString
-					println(response.body)
-					} catch { case e: Exception =>
-						println(e.getMessage)
-					}
-				}
 	}
 
 
@@ -75,7 +81,7 @@ class PerformanceSimulation extends Simulation {
 			"amountATM="+random.nextInt(2000).toString+"00000000&" +
 			"recipient=${accountRS}&secretPhrase="+random.nextInt(200).toString))
 		.exec { session =>
-			println(session)
+			//println(session)
 			session
 		}
 
@@ -136,10 +142,20 @@ class PerformanceSimulation extends Simulation {
 
 
 	val inject = 	constantUsersPerSec(users) during (duration minutes)
-	val inject_ramp = 	rampUsers(25) during (duration minutes)
+	val inject_ramp = rampUsers(users) during (duration minutes)
 	setUp(
 	  	scn.inject(inject),
 	    scn_1.inject(inject_ramp),
       scn_2.inject(inject_ramp)
 	).protocols(httpProtocol)
+
+	def getPeers(custompeer: String):HttpProtocolBuilder = {
+
+		if (custompeer.equals("")){
+			return http.baseUrls(peers)
+		}else{
+			return http.baseUrl(custompeer)
+		}
+	}
+
 }

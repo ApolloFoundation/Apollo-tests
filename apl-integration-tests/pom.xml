@@ -97,7 +97,7 @@
     <dependency>
       <groupId>com.apollocurrency</groupId>
       <artifactId>apl-api</artifactId>
-      <version>${project.version}</version>
+      <version>1.46.1</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
