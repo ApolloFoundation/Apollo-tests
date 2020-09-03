@@ -1,46 +1,80 @@
+package com.apollocurrency
+
 import scala.concurrent.duration._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scalaj.http._
 import com.typesafe.config.ConfigFactory
+
 import scala.util.parsing.json._
 import scala.util.Random
 import com.google.gson.Gson
+import io.gatling.http.protocol.HttpProtocolBuilder
+
 import scala.collection.JavaConverters._
 
-class PerformanceSendMoney extends Simulation {
+class SendMoney_v2 extends Simulation {
 
 	val gson = new Gson
 	val random = new Random
 	val env: String = System.getProperty("test.env")
 	val users = System.getProperty("users").toDouble
 	val duration = System.getProperty("duration").toDouble
-//	val childAccounts = ConfigFactory.load("application.conf").getString("childAccountsReq")
+	val forging = System.getProperty("forging").toBoolean
+	val custompeer = System.getProperty("custompeer").toString
+	var peers = ConfigFactory.load("application.conf").getStringList(env).asScala.toList
 	var childPass = ConfigFactory.load("application.conf").getStringList("childPass").asScala.toList
 	val parent = ConfigFactory.load("application.conf").getString("parent")
 	val psecret = ConfigFactory.load("application.conf").getString("psecret")
 	val ONE_APL = 100000000
-	val httpProtocol = http.baseUrl(env)
+	val httpProtocol = getPeers(custompeer)
 
 
 
 	before {
-		println("Start forging!")
 
   	try {
-					val forgingResponse = Http(env+"/apl")
-						.postForm
-						.param("requestType","startForging")
-						.param("secretPhrase","1").asString
-				     println(forgingResponse.body)
+			if (forging) {
+				println("Stop/Start forging!")
+				for (peer <- peers) {
+					try {
+						println(peer)
+						val response = Http(peer + "/apl")
+							.postForm
+							.param("requestType", "stopForging")
+							.param("adminPassword", "1").asString
+						println(response.body)
 
-		    	val setChildAccountsResponse = Http(env+"/rest/v2/account/test")
+					} catch {
+						case e: Exception =>
+							println(e.getMessage)
+					}
+				}
+
+				for (i <- 1 to 200) {
+					try {
+						val peer = peers(
+							random.nextInt(peers.length)
+						)
+						println(peer)
+						val response = Http(peer + "/apl")
+							.postForm
+							.param("requestType", "startForging")
+							.param("secretPhrase", i.toString).asString
+						println(response.body)
+					} catch {
+						case e: Exception =>
+							println(e.getMessage)
+					}
+				}
+			}
+		    	val setChildAccountsResponse = Http(getPeer(custompeer)+"/rest/v2/account/test")
 				    .postData(gson.toJson(new SetChildReq(parent,psecret,childPass.asJava))).header("content-type", "application/json").asString
 
 		     	val trxByte = JSON.parseFull(setChildAccountsResponse.body).get.asInstanceOf[Map[String, Any]]("tx")
 
 
-			    val broadcastResponse = Http(env+"/apl")
+			    val broadcastResponse = Http(getPeer(custompeer)+"/apl")
 				     .postForm
 				     .param("requestType","broadcastTransaction")
 				     .param("transactionBytes",trxByte.toString).asString
@@ -86,6 +120,21 @@ class PerformanceSendMoney extends Simulation {
 
 	setUp(scn.inject(inject)).protocols(httpProtocol)
 
+	def getPeers(custompeer: String):HttpProtocolBuilder = {
+		if (custompeer.equals("")){
+			return http.baseUrls(peers)
+		}else{
+			return http.baseUrl(custompeer)
+		}
+	}
+
+	def getPeer(custompeer: String):String = {
+		if (custompeer.equals("")){
+			return peers(0)
+		}else{
+			return custompeer
+		}
+	}
 }
 
 class SendMoneyReq(var parent: String,var psecret: String,var csecret: String,var sender: String,var recipient: String,var amount: String) {

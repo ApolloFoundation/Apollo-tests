@@ -11,10 +11,11 @@
   <properties>
     <aspectj.version>1.9.4</aspectj.version>
     <custompeer>""</custompeer>
-    <test.env>n2</test.env>
+    <test.env>n3</test.env>
     <users>10</users>
-    <duration>2</duration>
+    <duration>1</duration>
     <forging>false</forging>
+    <className></className>
   </properties>
 
   <dependencies>
@@ -74,6 +75,7 @@
         <version>3.0.4</version>
         <configuration>
           <runMultipleSimulations>true</runMultipleSimulations>
+          <simulationClass>${className}</simulationClass>
           <jvmArgs>
             <jvmArg>-Dusers=${users}</jvmArg>
             <jvmArg>-Dduration=${duration}</jvmArg>

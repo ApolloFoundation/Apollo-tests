@@ -13,7 +13,7 @@ import java.util.UUID.randomUUID
 import java.util.concurrent.TimeUnit
 
 
-class PerformanceSimulation extends Simulation {
+class AllTypeTrx extends Simulation {
 
 	val env: String = System.getProperty("test.env")
 	val users = System.getProperty("users").toInt
