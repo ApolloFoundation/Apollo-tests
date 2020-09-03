@@ -1,0 +1,5 @@
+mvn -Dusers=user -Dduration=duration -Dtest=n1  gatling:test
+
+-Dusers= Count of user per/sec
+-Dduration= Test runtime in minutes
+-Dtest= env (deafault = localhost)  n1 n2 n3
