@@ -56,6 +56,7 @@ class PerformanceSendMoney extends Simulation {
 	val scn = scenario("Send Money")
 		.exec {session =>
 			session.set("csecret",random.nextInt(99)+100000)
+				     .set("amountATM",(random.nextInt(1000) + 1)+"00000000")
 		}
 		.exec(http("Get Recipient Account Id")
 			.post("/apl?requestType=getAccountId&secretPhrase="+(random.nextInt(99)+100000).toString)
@@ -67,7 +68,7 @@ class PerformanceSendMoney extends Simulation {
 			.check(jsonPath("$.accountRS").find.saveAs("SenderAccountRS")))
 		.exec(http("Send Money v2")
 			.post("/rest/v2/account/money")
-			.body(StringBody(gson.toJson(new SendMoneyReq(parent,psecret,"${csecret}", "${SenderAccountRS}","${accountRS}", (random.nextInt(100) + 1)+"00000000"))
+			.body(StringBody(gson.toJson(new SendMoneyReq(parent,psecret,"${csecret}", "${SenderAccountRS}","${accountRS}", "${amountATM}"))
 			)).asJson
 			.check(jsonPath("$.errorDescription").notExists.saveAs("errorDescription"))
 			.check(jsonPath("$.tx").find.saveAs("tx")))
