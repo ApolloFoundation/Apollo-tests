@@ -209,7 +209,7 @@ public class TestAccounts extends TestBaseNew {
         Set<Wallet> wallets = new HashSet<>();
 
         int countOfTransactions = 50;
-        for (int i = 10000; i < countOfTransactions+10000; i++) {
+        for (int i = 0; i < countOfTransactions; i++) {
             Wallet new_wallet = getNewWallet(String.valueOf(i));
             wallets.add(new_wallet);
             CreateTransactionResponse sendMoneyResponse = sendMoney(wallet, new_wallet.getUser(), 10);

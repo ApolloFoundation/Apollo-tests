@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Data
+@AllArgsConstructor
 @ToString
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Wallet {
     private String user;
@@ -43,5 +44,53 @@ public class Wallet {
     public String toString() {
         String walletType =  (vault)? "Vault Wallet: ":"Standard Wallet: ";
         return walletType + getUser();
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public boolean isVault() {
+        return vault;
+    }
+
+    public void setVault(boolean vault) {
+        this.vault = vault;
+    }
+
+    public String getEthAddress() {
+        return ethAddress;
+    }
+
+    public void setEthAddress(String ethAddress) {
+        this.ethAddress = ethAddress;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 }

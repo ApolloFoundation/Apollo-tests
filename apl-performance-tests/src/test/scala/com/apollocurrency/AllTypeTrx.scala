@@ -30,6 +30,7 @@ class AllTypeTrx extends Simulation {
 		 if (forging) {
 			 println("Stop/Start forging!")
 			 for (peer <- peers) {
+			
 				 try {
 					 println(peer)
 					 val response = Http(peer + "/apl")

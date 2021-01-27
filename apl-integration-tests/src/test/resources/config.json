@@ -1,8 +1,8 @@
 {
-  "host": "51.15.253.171",
+  "host": "localhost",
   "port": "7876",
   "adminPassword": "1",
-  "defaultImage": "Icon.jpeg",
+  "defaultImage": "Icon.png",
   "standartWallet": {
     "user": "APL-AKU5-JP6B-Y42V-H5X8U",
     "pass": "111",
@@ -52,10 +52,11 @@
     "n3": {
       "peers": [
         "51.15.250.32",
-        "51.15.253.171",
         "51.15.210.116",
         "51.15.242.197",
-        "51.15.218.241"
+        "51.15.218.241",
+        "51.15.130.37",
+        "51.15.242.197"
       ],
       "chainId": "3fecf3bd-86a3-436b-a1d6-41eefc0bd1c6"
     }

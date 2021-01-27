@@ -5,12 +5,12 @@
 
   <groupId>apl-integration-tests</groupId>
   <artifactId>apl-integration-tests</artifactId>
-  <version>1.46.1</version>
+  <version>1.47.4</version>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
     <aspectj.version>1.9.4</aspectj.version>
-    <test.env>localhost</test.env>
+    <test.env></test.env>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
   </properties>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>com.apollocurrency</groupId>
       <artifactId>apl-api</artifactId>
-      <version>1.46.1</version>
+      <version>1.46.2</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
