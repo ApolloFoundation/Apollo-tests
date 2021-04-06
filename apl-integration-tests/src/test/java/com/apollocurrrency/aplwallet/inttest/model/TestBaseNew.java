@@ -722,7 +722,7 @@ public class TestBaseNew extends TestBase {
             .spec(restHelper.getSpec())
             .contentType(ContentType.URLENC)
             .formParams(param)
-            .when()
+            .when().log().all()
             .post(path).as(VaultWalletResponse.class);
 
     }
@@ -1958,6 +1958,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);

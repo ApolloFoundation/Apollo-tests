@@ -221,10 +221,12 @@ public class TestAccounts extends TestBaseNew {
             verifyTransactionInBlock(trx);
         }
 
+        /*
         for (Wallet wl : wallets) {
             int allBalance = (int)((getBalance(wl).getBalanceATM() - 100000000L) / 100000000) ;
-            sendMoney(wl, wallet.getUser(), allBalance);
+            sendMoney(wl, wl.getUser(), allBalance);
         }
+         */
     }
 
 
@@ -298,11 +300,11 @@ public class TestAccounts extends TestBaseNew {
     @ArgumentsSource(WalletProvider.class)
     public void leaseBalanceTest(Wallet wallet){
         String firstLeaseWalletPass = "1";
-        String secondtLeaseWalletPass = "2";
+        String secondLeaseWalletPass = "2";
         CreateTransactionResponse response;
 
         Wallet firstleaseWallet = new Wallet(getAccountId(firstLeaseWalletPass).getAccountRS(), firstLeaseWalletPass);
-        Wallet secondtleaseWallet = new Wallet(getAccountId(secondtLeaseWalletPass).getAccountRS(), secondtLeaseWalletPass);
+        Wallet secondtleaseWallet = new Wallet(getAccountId(secondLeaseWalletPass).getAccountRS(), secondLeaseWalletPass);
 
         GetAccountResponse accountDTO = getAccount(wallet.getUser());
        if (accountDTO.getEffectiveBalanceAPL() > 1000L) {

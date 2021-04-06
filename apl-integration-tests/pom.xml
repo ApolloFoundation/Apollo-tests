@@ -5,7 +5,7 @@
 
   <groupId>apl-integration-tests</groupId>
   <artifactId>apl-integration-tests</artifactId>
-  <version>1.47.4</version>
+  <version>1.48.3</version>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>com.apollocurrency</groupId>
       <artifactId>apl-api</artifactId>
-      <version>1.46.2</version>
+      <version>1.48.3</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
