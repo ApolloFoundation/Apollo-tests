@@ -717,7 +717,7 @@ public class TestBaseNew extends TestBase {
         String path = "/rest/keyStore/download";
         HashMap<String, String> param = new HashMap();
         param.put("account", wallet.getUser());
-        param.put("passPhrase", wallet.getPass());
+        param.put("passphrase", wallet.getPass());
         return given().log().all()
             .spec(restHelper.getSpec())
             .contentType(ContentType.URLENC)
@@ -2726,6 +2726,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);

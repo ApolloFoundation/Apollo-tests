@@ -17,7 +17,8 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @DisplayName("TaggedData")
@@ -68,9 +69,12 @@ public class TestTaggedData extends TestBaseNew {
         assertEquals(description, getTaggedData(uploadData.getTransaction()).getDescription(), "descriptions are not the same");
         assertEquals(channel, getTaggedData(uploadData.getTransaction()).getChannel(), "channels are not the same");
         assertEquals(tagsQuantity + parsedTags, getDataTagCount().getNumberOfDataTags(), "quantity of tags are different");
+        assertNotNull(searchTaggedDataByName(Name).getData(), "search by name doesn't work");
+        assertFalse(searchTaggedDataByName(Name).getData().isEmpty(), "search by name doesn't work");
         assertEquals(Name, searchTaggedDataByName(Name).getData().get(0).getName(), "search by name doesn't work");
         log.info(" Tag from getTaggedData =  {} ", getTaggedData(uploadData.getTransaction()).getParsedTags().get(0));
-        assertEquals(getTaggedData(uploadData.getTransaction()).getParsedTags().get(0), searchTaggedDataByTag(tag).getData().get(0).getParsedTags().get(0), "search by tag doesn't work");
+        assertEquals(getTaggedData(uploadData.getTransaction()).getParsedTags().get(0),
+                searchTaggedDataByTag(tag).getData().get(0).getParsedTags().get(0), "search by tag doesn't work");
         log.info(" Tag from searchTaggedData =  {} ", searchTaggedDataByTag(tag).getData().get(0).getParsedTags().get(0));
     }
 
@@ -89,6 +93,8 @@ public class TestTaggedData extends TestBaseNew {
         assertEquals(description, getTaggedData(uploadData.getTransaction()).getDescription(), "descriptions are not the same");
         assertEquals(channel, getTaggedData(uploadData.getTransaction()).getChannel(), "channels are not the same");
         assertEquals(tagsQuantity + parsedTags, getDataTagCount().getNumberOfDataTags(), "quantity of tags are different");
+        assertNotNull(searchTaggedDataByName(Name).getData(), "search by name doesn't work");
+        assertFalse(searchTaggedDataByName(Name).getData().isEmpty(), "search by name doesn't work");
         assertEquals(Name, searchTaggedDataByName(Name).getData().get(0).getName(), "search by name doesn't work");
         log.info(" Tag from getTaggedData =  {} ", getTaggedData(uploadData.getTransaction()).getParsedTags().get(0));
         log.info(" Tag from searchTaggedData =  {} ", searchTaggedDataByTag(tag).getData().get(0).getParsedTags().get(0));
