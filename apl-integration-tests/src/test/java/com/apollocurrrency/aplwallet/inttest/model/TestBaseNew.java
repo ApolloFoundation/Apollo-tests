@@ -1926,17 +1926,23 @@ public class TestBaseNew extends TestBase {
         param.put(ReqParam.ISSUANCE_HEIGHT, "0");
         param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply));
         param.put(ReqParam.RESERVE_SUPPLY, "0");
+        param.put(ReqParam.BROADCAST,"false");
+        param.put("validate","true");
 
+        System.out.println("+++++++++EXCHANGEABLE+++++++++++");
         if ((type & RESERVABLE) == RESERVABLE) {
+            System.out.println("+++++++++RESERVABLE+++++++++++");
             param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply+50));
             param.put(ReqParam.RESERVE_SUPPLY, String.valueOf(maxSupply+50));
             param.put(ReqParam.ISSUANCE_HEIGHT, String.valueOf(issuanceHeight));
             param.put(ReqParam.MIN_RESERVE_PER_UNIT, String.valueOf(1));
         }
         if ((type & CLAIMABLE) == CLAIMABLE) {
+            System.out.println("+++++++++CLAIMABLE+++++++++++");
             param.put(ReqParam.INITIAL_SUPPLY, "0");
         }
         if ((type & MINTABLE) == MINTABLE && (type & RESERVABLE) == RESERVABLE) {
+            System.out.println("+++++++++MINTABLE RESERVABLE+++++++++++");
             param.put(ReqParam.ALGORITHM, "2");
             param.put(ReqParam.MIN_DIFFICULTY, "1");
             param.put(ReqParam.MAX_DIFFICULTY, "2");
@@ -1945,6 +1951,7 @@ public class TestBaseNew extends TestBase {
         }
 
         if ((type & MINTABLE) == MINTABLE && (type & RESERVABLE) != RESERVABLE) {
+            System.out.println("+++++++++MINTABLE+++++++++++");
             param.put(ReqParam.ALGORITHM, "2");
             param.put(ReqParam.MIN_DIFFICULTY, "1");
             param.put(ReqParam.MAX_DIFFICULTY, "2");
@@ -2288,6 +2295,32 @@ public class TestBaseNew extends TestBase {
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
+    }
+
+    @Step
+    public CreateTransactionResponse currencyBurn(String currency, Wallet wallet,  int amount) {
+        HashMap<String, String> param = new HashMap();
+       // param = restHelper.addWalletParameters(param,wallet);
+        param.put(ReqParam.CURRENCY_ID, currency);
+        param.put(ReqParam.SENDER, wallet.getUser());
+        if (!wallet.isVault()) {
+            param.put(ReqParam.SECRET_PHRASE, wallet.getPass());
+        }else {
+            param.put(ReqParam.PASS_PHRASE, wallet.getPass());
+        }
+        param.put(ReqParam.BURNING_AMOUNT, String.valueOf(amount));
+        param.put(ReqParam.DEADLINE, "1440");
+        param.put(ReqParam.FEE_NEW, "100000000000");
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(param)
+                .when()
+                .post("rest/v2/currencies/burnings")
+                .then().log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", CreateTransactionResponse.class);
     }
 
     @Step

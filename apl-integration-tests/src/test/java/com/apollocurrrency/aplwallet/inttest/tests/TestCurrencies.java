@@ -26,8 +26,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @DisplayName("Currencies")
@@ -49,7 +48,7 @@ public class TestCurrencies extends TestBaseNew {
     @MethodSource("currencyAll")
     public void issueCurrencys(int type,Wallet wallet) {
         log.info("Issue Currencies type: {}", type);
-        int supply = RandomUtils.nextInt(0, 1000);
+        int supply = RandomUtils.nextInt(10, 1000);
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -58,6 +57,10 @@ public class TestCurrencies extends TestBaseNew {
                     supply,
                     RandomUtils.nextInt(0, 8));
             verifyCreatingTransaction(currency);
+            //verifyTransactionInBlock(currency.getTransaction());
+            //CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,10);
+            //assertNotNull(currencyBurnTransaction);
+
 
     }
 
@@ -82,6 +85,9 @@ public class TestCurrencies extends TestBaseNew {
             verifyTransactionInBlock(
               deleteCurrency(wallet, currency.getTransaction()).getTransaction()
             );
+
+        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,10);
+        assertNotNull(currencyBurnTransaction);
 
     }
 
@@ -125,6 +131,7 @@ public class TestCurrencies extends TestBaseNew {
                     .getTransaction())
                     .getAccountCurrencies().stream()
                     .anyMatch(account -> account.getAccountRS().equals(TestConfiguration.getTestConfiguration().getGenesisWallet().getUser())));
+
     }
 
 
@@ -180,6 +187,11 @@ public class TestCurrencies extends TestBaseNew {
                 exchange(currency, wallet);
 
             }
+
+        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,supply-1);
+        assertNotNull(currencyBurnTransaction);
+
+
     }
 
 
@@ -199,6 +211,7 @@ public class TestCurrencies extends TestBaseNew {
             verifyTransactionInBlock(currency.getTransaction());
             CreateTransactionResponse reserveTransaction = currencyReserveIncrease(currency.getTransaction(), wallet, supply + 1);
             verifyCreatingTransaction(reserveTransaction);
+
     }
 
     @DisplayName("Exchange Offer")
@@ -215,6 +228,10 @@ public class TestCurrencies extends TestBaseNew {
                     RandomUtils.nextInt(0, 8));
             verifyCreatingTransaction(currency);
             exchange(currency, wallet);
+
+        verifyTransactionInBlock(currency.getTransaction());
+        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,1);
+        assertNotNull(currencyBurnTransaction);
     }
 
 

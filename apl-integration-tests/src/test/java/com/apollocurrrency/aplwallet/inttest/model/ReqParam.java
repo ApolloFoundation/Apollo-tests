@@ -11,6 +11,7 @@ public class ReqParam {
     public static final String AMOUNT_ATM = "amountATM";
     public static final String WALLET = "wallet";
     public static final String FEE = "feeATM";
+    public static final String FEE_NEW = "fee";
     public static final String DEADLINE = "deadline";
     public static final String INCLUDE_EFFECTIVE_BALANCE = "includeEffectiveBalance";
     public static final String PERIOD = "period";
@@ -64,6 +65,8 @@ public class ReqParam {
     public static final String COUNTER = "counter";
     public static final String UNITS = "units";
     public static final String CURRENCY = "currency";
+    public static final String CURRENCY_ID = "currencyId";
+    public static final String BURNING_AMOUNT = "burningAmount";
     public static final String MAX_DIFFICULTY = "maxDifficulty";
     public static final String MIN_DIFFICULTY = "minDifficulty";
     public static final String ALGORITHM = "algorithm";

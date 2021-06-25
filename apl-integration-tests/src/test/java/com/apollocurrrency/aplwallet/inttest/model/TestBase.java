@@ -76,7 +76,7 @@ public abstract class TestBase {
 
             importSecretFileSetUp(secretFilePath, TestConfiguration.getTestConfiguration().getVaultWallet().getPass());
             //startForgingSetUp();
-            //setUpTestData();
+            setUpTestData();
 
         log.info("Preconditions finished");
     }
