@@ -20,6 +20,7 @@ import com.apollocurrrency.aplwallet.inttest.helper.providers.WalletProvider;
 import com.apollocurrrency.aplwallet.inttest.model.TestBaseNew;
 import com.apollocurrrency.aplwallet.inttest.model.Wallet;
 import io.qameta.allure.Epic;
+import io.qameta.allure.Flaky;
 import io.qameta.allure.Issue;
 import net.jodah.failsafe.Failsafe;
 import org.junit.jupiter.api.DisplayName;
@@ -136,17 +137,18 @@ public class TestAccounts extends TestBaseNew {
     @DisplayName("Verify Unconfirmed Transactions endpoint")
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ArgumentsSource(WalletProvider.class)
+    @Flaky
     public void testGetUnconfirmedTransactions(Wallet wallet) throws IOException {
-        sendMoney(wallet, getTestConfiguration().getStandartWallet().getUser(), 2);
-        TransactionListResponse transactionInfos = getUnconfirmedTransactions(wallet);
-        assertNotNull(transactionInfos.getUnconfirmedTransactions());
-        assertThat(transactionInfos.getUnconfirmedTransactions().size(),greaterThan(0));
+        sendMoneyReference(wallet, getTestConfiguration().getStandartWallet().getUser(), 2,"addd79bbbbc15c6c556ceb5e1625056c7b24a3dcce914ceb439b97919a0afdd6");
+        TransactionListResponse transactionsInfo = getUnconfirmedTransactions(wallet);
+        assertNotNull(transactionsInfo.getUnconfirmedTransactions());
+        assertThat(transactionsInfo.getUnconfirmedTransactions().size(),greaterThan(0));
     }
 
     @Test
     @DisplayName("Verify Unconfirmed Transactions Ids endpoint")
     public void testGetUnconfirmedTransactionsIds() throws IOException {
-        sendMoney(getTestConfiguration().getStandartWallet(), getTestConfiguration().getStandartWallet().getUser(), 2);
+        sendMoneyReference(getTestConfiguration().getStandartWallet(), getTestConfiguration().getStandartWallet().getUser(), 2,"test hash");
         AccountTransactionIdsResponse accountTransactionIdsResponse = Failsafe.with(retryPolicy).get(() -> getUnconfirmedTransactionIds(getTestConfiguration().getStandartWallet().getUser()));
         assertThat(accountTransactionIdsResponse.getUnconfirmedTransactionIds().size() , greaterThan(0));
     }
@@ -303,31 +305,39 @@ public class TestAccounts extends TestBaseNew {
         String secondLeaseWalletPass = "2";
         CreateTransactionResponse response;
 
-        Wallet firstleaseWallet = new Wallet(getAccountId(firstLeaseWalletPass).getAccountRS(), firstLeaseWalletPass);
-        Wallet secondtleaseWallet = new Wallet(getAccountId(secondLeaseWalletPass).getAccountRS(), secondLeaseWalletPass);
+        AccountDTO firstAccount =  getAccountId(firstLeaseWalletPass);
+        AccountDTO secondAccount =  getAccountId(secondLeaseWalletPass);
+        Wallet firstLeaseWallet = new Wallet(firstAccount.getAccountRS(), firstAccount.getAccount(), firstLeaseWalletPass);
+        Wallet secondLeaseWallet = new Wallet(secondAccount.getAccountRS(),secondAccount.getAccount(), secondLeaseWalletPass);
 
-        GetAccountResponse accountDTO = getAccount(wallet.getUser());
+       GetAccountResponse accountDTO = getAccount(wallet.getUser());
+
        if (accountDTO.getEffectiveBalanceAPL() > 1000L) {
             startForging(wallet);
-            response =  leaseBalance(firstleaseWallet.getUser(),wallet);
+            response =  leaseBalance(firstLeaseWallet.getUser(),wallet);
             verifyTransactionInBlock(response.getTransaction());
         }
 
 
-        accountDTO = getAccount(firstleaseWallet.getUser());
+        accountDTO = getAccount(firstLeaseWallet.getUser());
+
+
         if (accountDTO.getEffectiveBalanceAPL() > 1000L) {
-            startForging(firstleaseWallet);
-            response =  leaseBalance(secondtleaseWallet.getUser(),firstleaseWallet);
+            startForging(firstLeaseWallet);
+            response =  leaseBalance(secondLeaseWallet.getUser(),firstLeaseWallet);
             verifyTransactionInBlock(response.getTransaction());
         }
-       startForging(secondtleaseWallet);
+
+
+       startForging(secondLeaseWallet);
 
         // accountDTO.getEffectiveBalanceAPL() == 0 after 1440 blocks
-/*       accountDTO = getAccount(wallet.getUser());
+/*     accountDTO = getAccount(wallet.getUser());
        assertThat("Effective Balance not valid", accountDTO.getEffectiveBalanceAPL(),greaterThan(0L));
 
        accountDTO = getAccount(firstleaseWallet.getUser());
-       assertThat("Effective Balance not valid", accountDTO.getEffectiveBalanceAPL(),greaterThan(0L));*/
+       assertThat("Effective Balance not valid", accountDTO.getEffectiveBalanceAPL(),greaterThan(0L));
+       */
     }
 
 }

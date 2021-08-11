@@ -4,6 +4,7 @@ package com.apollocurrrency.aplwallet.inttest.tests;
 
 import com.apollocurrency.aplwallet.api.dto.ShufflingParticipant;
 import com.apollocurrency.aplwallet.api.dto.account.AccountCurrencyDTO;
+import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountAssetsResponse;
 import com.apollocurrency.aplwallet.api.response.AccountCurrencyResponse;
@@ -49,7 +50,7 @@ public class TestShuffling extends TestBaseNew {
 
     RetryPolicy retry = new RetryPolicy()
             .retryWhen(false)
-            .withMaxRetries(30)
+            .withMaxRetries(20)
             .withDelay(4, TimeUnit.SECONDS);
 
     private final int NON_SHUFFLEABLE = 32;
@@ -98,8 +99,8 @@ public class TestShuffling extends TestBaseNew {
      void shufflingCreateTest(int type, Wallet wallet) {
         log.info("Shuffling Type: "+type);
         ShufflingDTO shufflingDTO;
-        int registrationPeriod = RandomUtils.nextInt(500, 10080);
-        randomStandart = getRandomStandartWallet();
+        int registrationPeriod = RandomUtils.nextInt(50, 1000);
+        randomStandart = getRandomStandardWallet();
         randomVault = getRandomVaultWallet();
             switch (type) {
                 case SHUFFLING_TYPE_APL:
@@ -189,9 +190,11 @@ public class TestShuffling extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Shuffling type: {0}  Wallet type: {1}")
     @ArgumentsSource(ShufflingArgumentProvider.class)
     public void shufflingCreateAutomationTest(int type,Wallet wallet) {
-        int registrationPeriod = RandomUtils.nextInt(500, 10080);
-        randomStandart = getRandomStandartWallet();
+        int registrationPeriod = RandomUtils.nextInt(50, 1000);
+        randomStandart = getRandomStandardWallet();
         randomVault = getRandomVaultWallet();
+
+
 
 
             switch (type) {
@@ -213,7 +216,7 @@ public class TestShuffling extends TestBaseNew {
                     AccountCurrencyResponse currencies = getAccountCurrencies(wallet);
                     assertNotNull(currencies.getAccountCurrencies());
                     AccountCurrencyDTO currencyDTO = currencies.getAccountCurrencies().stream()
-                            .filter(currencie -> (currencie.getType() & NON_SHUFFLEABLE) != NON_SHUFFLEABLE)
+                            .filter(currency -> (currency.getType() & NON_SHUFFLEABLE) != NON_SHUFFLEABLE)
                             .findFirst().get();
                     verifyTransactionInBlock(transferCurrency(randomStandart.getUser(), currencyDTO.getCurrency(), wallet, 3).getTransaction());
                     verifyTransactionInBlock(transferCurrency(randomVault.getUser(), currencyDTO.getCurrency(), wallet, 3).getTransaction());
@@ -230,8 +233,9 @@ public class TestShuffling extends TestBaseNew {
 
 
             startShuffler(wallet, shuffling.getFullHash(), recipients.get(0).getPass());
-            startShuffler(randomStandart, shuffling.getFullHash(), recipients.get(1).getPass());
-            startShuffler(randomVault, shuffling.getFullHash(), recipients.get(2).getPass());
+            startShuffler(randomStandart, shuffling.getFullHash(),recipients.get(1).getPass());
+            startShuffler(randomVault, shuffling.getFullHash(),recipients.get(2).getPass());
+
 
             log.info("Shuffling started " + shuffling.getTransaction());
             waitForShufflingDeleted(shuffling.getTransaction());
@@ -245,9 +249,9 @@ public class TestShuffling extends TestBaseNew {
     @ArgumentsSource(ShufflingArgumentProvider.class)
     void shufflingCancelTest(int type,Wallet wallet) {
         ShufflingDTO shufflingDTO;
-        int registrationPeriod = RandomUtils.nextInt(500, 10080);
+        int registrationPeriod = RandomUtils.nextInt(50, 1000);
 
-        randomStandart = getRandomStandartWallet();
+        randomStandart = getRandomStandardWallet();
         randomVault = getRandomVaultWallet();
             switch (type) {
                 case SHUFFLING_TYPE_APL:
@@ -333,7 +337,7 @@ public class TestShuffling extends TestBaseNew {
 
             case SHUFFLING_TYPE_APL:
                 for (Wallet recipient : recipients) {
-                    assertEquals(APL_AMOUNT, getBalance(recipient).getBalanceATM() / 100000000);
+                    assertEquals(APL_AMOUNT, getBalance(recipient).getBalanceATM() / 100000000,recipient.getUser());
                 }
                 break;
 
@@ -353,10 +357,19 @@ public class TestShuffling extends TestBaseNew {
     }
 
     @Step
-    private Wallet getRandomStandartWallet() {
+    private Wallet getRandomStandardWallet() {
         String randomPass = String.valueOf(RandomUtils.nextInt(1, 199));
-        Wallet wallet = new Wallet(getAccountId(randomPass).getAccountRS(), randomPass);
+        AccountDTO accountDTO = getAccountId(randomPass);
+        Wallet wallet = new Wallet(accountDTO.getAccountRS(), accountDTO.getAccount(),randomPass);
         log.info(String.format("Standard Wallet: %s pass: %s", wallet.getUser(), wallet.getPass()));
+
+        verifyTransactionInBlock(
+                sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), wallet.getUser(), 10000).getTransaction()
+        );
+
+        verifyTransactionInBlock(
+                sendMoney(wallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
+        );
         return wallet;
     }
 
@@ -364,20 +377,21 @@ public class TestShuffling extends TestBaseNew {
     private Wallet getRandomRecipientWallet() {
         String randomPass = RandomStringUtils.randomAlphabetic(10);
         log.info("Recipient SecretPhrase: " + randomPass);
-        return new Wallet(getAccountId(randomPass).getAccountRS(), randomPass);
+        AccountDTO accountDTO = getAccountId(randomPass);
+        return new Wallet(accountDTO.getAccountRS(),  accountDTO.getAccount(),randomPass);
     }
 
     @Step
     private Wallet getRandomVaultWallet() {
         Account2FAResponse account = generateNewAccount();
-        Wallet vaultWallet = new Wallet(account.getAccountRS(), account.getPassphrase(), true);
+        Wallet vaultWallet = new Wallet(account.getAccountRS(), account.getPassphrase(), true,account.getAccount());
         log.info(String.format("Vault Wallet: %s pass: %s", vaultWallet.getUser(), vaultWallet.getPass()));
 
         verifyTransactionInBlock(
                 sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), vaultWallet.getUser(), 10000).getTransaction()
         );
         verifyTransactionInBlock(
-                sendMoney(vaultWallet, vaultWallet.getUser(), 10).getTransaction()
+                sendMoney(vaultWallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
         );
         return vaultWallet;
     }

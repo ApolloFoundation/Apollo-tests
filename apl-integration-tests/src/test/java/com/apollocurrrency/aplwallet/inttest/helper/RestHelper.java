@@ -53,6 +53,7 @@ public class RestHelper {
 
     public HashMap<String, String> addWalletParameters(HashMap<String, String> param, Wallet wallet) {
         param.put(ReqParam.ACCOUNT, wallet.getUser());
+
         if (!wallet.isVault()) {
             param.put(ReqParam.SECRET_PHRASE, wallet.getPass());
         } else {

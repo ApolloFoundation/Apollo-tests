@@ -46,9 +46,11 @@ public class TestCurrencies extends TestBaseNew {
     @DisplayName("Issue Currencies")
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyAll")
-    public void issueCurrencys(int type,Wallet wallet) {
+    public void issueCurrencies(int type,Wallet wallet) {
         log.info("Issue Currencies type: {}", type);
-        int supply = RandomUtils.nextInt(10, 1000);
+        //int supply = RandomUtils.nextInt(10, 1000);
+        long supply = 3000000000000000000L;
+
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -57,9 +59,27 @@ public class TestCurrencies extends TestBaseNew {
                     supply,
                     RandomUtils.nextInt(0, 8));
             verifyCreatingTransaction(currency);
-            //verifyTransactionInBlock(currency.getTransaction());
-            //CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,10);
-            //assertNotNull(currencyBurnTransaction);
+            verifyTransactionInBlock(currency.getTransaction());
+    }
+
+    @DisplayName("Currencies Burn")
+    @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
+    @MethodSource("currencyBurn")
+    public void currencyBurn(int type,Wallet wallet) {
+        log.info("Issue Currencies type: {}", type);
+        //int supply = RandomUtils.nextInt(10, 1000);
+        long supply = 9223372036854775807L;
+        CreateTransactionResponse currency = issueCurrency(wallet, type,
+                RandomStringUtils.randomAlphabetic(5),
+                RandomStringUtils.randomAlphabetic(5),
+                RandomStringUtils.randomAlphabetic(5).toUpperCase(),
+                supply,
+                supply,
+                RandomUtils.nextInt(0, 8));
+        verifyCreatingTransaction(currency);
+        verifyTransactionInBlock(currency.getTransaction());
+        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,10);
+        assertNotNull(currencyBurnTransaction);
 
 
     }
@@ -86,16 +106,14 @@ public class TestCurrencies extends TestBaseNew {
               deleteCurrency(wallet, currency.getTransaction()).getTransaction()
             );
 
-        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,10);
-        assertNotNull(currencyBurnTransaction);
-
     }
 
     @DisplayName("Get ( currency /  currency accounts / all) ")
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ArgumentsSource(WalletProvider.class)
     public void deleteCurrency(Wallet wallet) {
-        int supply = RandomUtils.nextInt(0, 1000);
+        //int supply = RandomUtils.nextInt(0, 1000);
+        long supply = 9223372036854775807L;
         CreateTransactionResponse currency = issueCurrency(wallet, 1,
                 RandomStringUtils.randomAlphabetic(5),
                 RandomStringUtils.randomAlphabetic(5),
@@ -115,7 +133,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyExchangeable")
     public void transferCurrencyTest(int type,Wallet wallet) {
-        int supply = RandomUtils.nextInt(0, 1000);
+        //int supply = RandomUtils.nextInt(0, 1000);
+        long supply = 9223372036854775807L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -135,7 +154,7 @@ public class TestCurrencies extends TestBaseNew {
     }
 
 
-    @DisplayName("Mint Currencys")
+    @DisplayName("Mint Currencies")
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @ValueSource(ints = {17})
     @Disabled
@@ -156,7 +175,7 @@ public class TestCurrencies extends TestBaseNew {
         }
     }
 
-    @DisplayName("Reserve Claim Currencys")
+    @DisplayName("Reserve Claim Currencies")
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyClaimableAndReservable")
     public void currencyReserveClaimTest(int type,Wallet wallet) {
@@ -187,11 +206,6 @@ public class TestCurrencies extends TestBaseNew {
                 exchange(currency, wallet);
 
             }
-
-        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,supply-1);
-        assertNotNull(currencyBurnTransaction);
-
-
     }
 
 
@@ -199,7 +213,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyClaimableAndReservable")
     public void currencyReserveIncreaseTest(int type, Wallet wallet) {
-        int supply = RandomUtils.nextInt(1, 1000);
+        //int supply = RandomUtils.nextInt(1, 1000);
+        long supply = 9223372036854775806L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -218,7 +233,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyExchangeable")
     public void publishExchangeOfferTest(int type, Wallet wallet) {
-        int supply = RandomUtils.nextInt(1, 1000);
+        //int supply = RandomUtils.nextInt(1, 1000);
+        long supply = 9223372036854775807L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -228,10 +244,8 @@ public class TestCurrencies extends TestBaseNew {
                     RandomUtils.nextInt(0, 8));
             verifyCreatingTransaction(currency);
             exchange(currency, wallet);
-
         verifyTransactionInBlock(currency.getTransaction());
-        CreateTransactionResponse currencyBurnTransaction = currencyBurn(currency.getTransaction(),wallet,1);
-        assertNotNull(currencyBurnTransaction);
+
     }
 
 
@@ -264,6 +278,11 @@ public class TestCurrencies extends TestBaseNew {
     }
     private static Stream<Arguments> currencyAll() {
         List<Integer> types = Arrays.asList(1, 3, 5, 7, 12, 13, 14, 15, 17, 19, 21, 23, 33, 35, 37, 39, 44, 45, 46, 47, 51, 53, 55);
+        return generateArgs(types);
+    }
+
+    private static Stream<Arguments> currencyBurn() {
+        List<Integer> types = Arrays.asList(1, 3, 5, 7, 17, 19, 21, 23, 33, 35, 37, 39, 51, 53, 55);
         return generateArgs(types);
     }
 

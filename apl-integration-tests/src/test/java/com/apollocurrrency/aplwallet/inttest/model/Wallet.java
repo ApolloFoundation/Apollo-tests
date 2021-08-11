@@ -25,10 +25,23 @@ public class Wallet {
         this.pass = pass;
     }
 
+    public Wallet(String user,String accountId, String pass) {
+        this.user = user;
+        this.accountId = accountId;
+        this.pass = pass;
+    }
+
     public Wallet(String user, String pass, boolean vault) {
         this.user = user;
         this.pass = pass;
         this.vault = vault;
+    }
+
+    public Wallet(String user, String pass, boolean vault, String accountId) {
+        this.user = user;
+        this.pass = pass;
+        this.vault = vault;
+        this.accountId = accountId;
     }
 
 

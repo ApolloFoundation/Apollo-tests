@@ -39,7 +39,7 @@ public class TestBlock extends TestBaseNew {
     @Test
     @DisplayName("Get Block ID")
     public void getBlockID() {
-        GetBlockIdResponse block = getBlockId("0");
+        GetBlockIdResponse block = getBlockId("1");
         assertNotNull(block.getBlock());
 
     }

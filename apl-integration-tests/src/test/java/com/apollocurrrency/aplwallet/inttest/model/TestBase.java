@@ -126,7 +126,7 @@ public abstract class TestBase {
             log.info("Send money on: "+TestConfiguration.getTestConfiguration().getStandartWallet());
 
             transactionResponse = sendMoneySetUp(TestConfiguration.getTestConfiguration().getGenesisWallet(),
-                    TestConfiguration.getTestConfiguration().getStandartWallet().getUser(), 1000000);
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getUser(), 10000000);
 
             verifyTransactionInBlockSetUp(transactionResponse.getTransaction());
 
@@ -141,7 +141,7 @@ public abstract class TestBase {
             log.info("Send money on: "+TestConfiguration.getTestConfiguration().getVaultWallet());
 
             transactionResponse = sendMoneySetUp(TestConfiguration.getTestConfiguration().getGenesisWallet(),
-                    TestConfiguration.getTestConfiguration().getVaultWallet().getUser(), 1000000);
+                    TestConfiguration.getTestConfiguration().getVaultWallet().getUser(), 10000000);
             verifyTransactionInBlockSetUp(transactionResponse.getTransaction());
 
             log.info("Verify account: "+TestConfiguration.getTestConfiguration().getVaultWallet());

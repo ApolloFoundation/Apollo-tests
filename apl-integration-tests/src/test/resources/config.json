@@ -1,5 +1,5 @@
 {
-  "host": "51.15.37.165",
+  "host": "localhost",
   "port": "7876",
   "adminPassword": "1",
   "defaultImage": "Icon.png",
@@ -7,7 +7,8 @@
     "user": "APL-AKU5-JP6B-Y42V-H5X8U",
     "pass": "111",
     "publicKey": "02a16b0e1e01a451ba2904ccc0c6d4ed88e3d8e2294b2099580d801eecb34e1c",
-    "vault": "false"
+    "vault": "false",
+    "accountId": "18238350908810610499"
   },
   "vaultWallet": {
     "user": "APL-MK35-9X23-YQ5E-8QBKH",
@@ -27,7 +28,7 @@
   "net": {
     "n1": {
       "peers": [
-        "51.15.210.116",
+        "51.15.235.41",
         "51.15.69.39",
         "51.15.59.37",
         "51.15.114.68",

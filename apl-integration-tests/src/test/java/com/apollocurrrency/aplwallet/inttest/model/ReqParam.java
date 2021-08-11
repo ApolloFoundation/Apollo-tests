@@ -170,6 +170,8 @@ public class ReqParam {
     public static final String PAIR_RATE = "pairRate";
     public static final String OFFER_AMOUNT = "offerAmount";
     public static final String ETH_WALLET_ADDRESS = "walletAddress";
+    public static final String VALIDATE = "validate";
+    public static final String REFERENCED_TRANSACTION_FULL_HASH = "referencedTransactionFullHash";
 
 
 }

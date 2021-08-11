@@ -144,6 +144,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", GetAccountResponse.class);
@@ -198,6 +199,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", AccountDTO.class);
@@ -292,6 +294,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", TransactionListResponse.class);
@@ -387,9 +390,65 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
+    }
+
+    @Step
+    public CreateTransactionResponse sendMoneyReference(Wallet wallet, String recipient, int moneyAmount,String referencedTransactionFullHash) {
+        HashMap<String, String> param = new HashMap();
+        param = restHelper.addWalletParameters(param,wallet);
+        param.put(ReqType.REQUEST_TYPE, ReqType.SEND_MONEY);
+        param.put(ReqParam.REFERENCED_TRANSACTION_FULL_HASH,referencedTransactionFullHash);
+        param.put(ReqParam.AMOUNT_ATM, moneyAmount +  "00000000");
+        param.put(ReqParam.RECIPIENT, recipient);
+        param.put(ReqParam.FEE, "200000000");
+        param.put(ReqParam.DEADLINE, "1440");
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.URLENC)
+                .formParams(param)
+                .when()
+                .post(path)
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", CreateTransactionResponse.class);
+    }
+
+
+
+
+
+    @Step
+    public CreateTransactionResponse sendMoneyPhasing(Wallet wallet, String recipient,int phasingFinishHeight, int moneyAmount) {
+        HashMap<String, String> param = new HashMap();
+        param = restHelper.addWalletParameters(param,wallet);
+        param.put(ReqType.REQUEST_TYPE, ReqType.SEND_MONEY);
+        param.put(ReqParam.AMOUNT_ATM, moneyAmount +  "00000000");
+        param.put(ReqParam.RECIPIENT, recipient);
+        param.put(ReqParam.PHASED, "true");
+        param.put(ReqParam.PHASING_FINISH_HEIGHT, String.valueOf(phasingFinishHeight));
+        param.put(ReqParam.PHASING_VOTING_MODEL, "1");
+        param.put(ReqParam.PHASING_QUORUM, "1");
+        param.put(ReqParam.FEE, "10000000000");
+        param.put(ReqParam.DEADLINE, "1440");
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.URLENC)
+                .formParams(param)
+                .when()
+                .post(path)
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", CreateTransactionResponse.class);
     }
 
     @Step
@@ -555,7 +614,7 @@ public class TestBaseNew extends TestBase {
         param.put(ReqType.REQUEST_TYPE, ReqType.SET_ALIAS);
         param.put(ReqParam.ALIAS_URI, aliasURL);
         param.put(ReqParam.ALIAS_NAME, aliasName);
-        param.put(ReqParam.FEE, "1000000000");
+        param.put(ReqParam.FEE, "250000000000");
         param.put(ReqParam.DEADLINE, "1440");
 
         return given().log().all()
@@ -565,6 +624,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -1736,6 +1796,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", ExpectedAssetDeletes.class);
@@ -1901,7 +1962,7 @@ public class TestBaseNew extends TestBase {
 
 
     @Step("Issue Currency with param: Type: {2}")
-    public CreateTransactionResponse issueCurrency(Wallet wallet, int type, String name, String description, String code, int initialSupply, int maxSupply, int decimals) {
+    public CreateTransactionResponse issueCurrency(Wallet wallet, int type, String name, String description, String code, long initialSupply, long maxSupply, int decimals) {
         int currentHeight = getBlock().getHeight();
         int issuanceHeight = currentHeight + 11;
 
@@ -1921,19 +1982,20 @@ public class TestBaseNew extends TestBase {
         param.put(ReqParam.TYPE, String.valueOf(type));
         param.put(ReqParam.INITIAL_SUPPLY, String.valueOf(initialSupply));
         param.put(ReqParam.DECIMALS, String.valueOf(decimals));
-        param.put(ReqParam.FEE, "100000000000");
+        param.put(ReqParam.FEE, "2500000000000");
         param.put(ReqParam.DEADLINE, "1440");
         param.put(ReqParam.ISSUANCE_HEIGHT, "0");
         param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply));
         param.put(ReqParam.RESERVE_SUPPLY, "0");
-        param.put(ReqParam.BROADCAST,"false");
-        param.put("validate","true");
+        //param.put(ReqParam.BROADCAST,"false");
+        //param.put("validate","true");
 
         System.out.println("+++++++++EXCHANGEABLE+++++++++++");
         if ((type & RESERVABLE) == RESERVABLE) {
             System.out.println("+++++++++RESERVABLE+++++++++++");
-            param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply+50));
-            param.put(ReqParam.RESERVE_SUPPLY, String.valueOf(maxSupply+50));
+            param.put(ReqParam.INITIAL_SUPPLY, String.valueOf(initialSupply - 50));
+            param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply));
+            param.put(ReqParam.RESERVE_SUPPLY, String.valueOf(maxSupply));
             param.put(ReqParam.ISSUANCE_HEIGHT, String.valueOf(issuanceHeight));
             param.put(ReqParam.MIN_RESERVE_PER_UNIT, String.valueOf(1));
         }
@@ -1943,11 +2005,12 @@ public class TestBaseNew extends TestBase {
         }
         if ((type & MINTABLE) == MINTABLE && (type & RESERVABLE) == RESERVABLE) {
             System.out.println("+++++++++MINTABLE RESERVABLE+++++++++++");
+            param.put(ReqParam.INITIAL_SUPPLY, String.valueOf(initialSupply - 50));
             param.put(ReqParam.ALGORITHM, "2");
             param.put(ReqParam.MIN_DIFFICULTY, "1");
             param.put(ReqParam.MAX_DIFFICULTY, "2");
-            param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply+50));
-            param.put(ReqParam.RESERVE_SUPPLY, String.valueOf(maxSupply+10));
+            param.put(ReqParam.MAX_SUPPLY, String.valueOf(maxSupply));
+            param.put(ReqParam.RESERVE_SUPPLY, String.valueOf(maxSupply-40));
         }
 
         if ((type & MINTABLE) == MINTABLE && (type & RESERVABLE) != RESERVABLE) {
@@ -1963,6 +2026,7 @@ public class TestBaseNew extends TestBase {
             .contentType(ContentType.URLENC)
             .formParams(param)
             .when()
+             .log().all()
             .post(path)
             .then()
             .log().all()
@@ -2202,7 +2266,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse currencyReserveIncrease(String currency, Wallet wallet, int amountPerUnitATM) {
+    public CreateTransactionResponse currencyReserveIncrease(String currency, Wallet wallet, long amountPerUnitATM) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.CURRENCY_RESERVE_INCREASE);
@@ -2528,6 +2592,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", AllTaggedDataResponse.class);
@@ -2546,6 +2611,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", AllTaggedDataResponse.class);
@@ -2783,6 +2849,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -2795,7 +2862,9 @@ public class TestBaseNew extends TestBase {
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.LEASE_BALANCE);
         param.put(ReqParam.RECIPIENT, recipient);
+        param.put(ReqParam.SENDER, wallet.getAccountId());
         param.put(ReqParam.PERIOD, "1500");
+        param.put(ReqParam.IS_CUSTOM_FEE, "false");
         param.put(ReqParam.FEE, "100000000000");
         param.put(ReqParam.DEADLINE, "1440");
 
@@ -2806,6 +2875,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -2891,7 +2961,7 @@ public class TestBaseNew extends TestBase {
             .formParams(param)
             .when()
             .get(path)
-            .then().log().body()
+            .then().log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", ShufflingDTO.class);
@@ -2964,6 +3034,7 @@ public class TestBaseNew extends TestBase {
         param.put(ReqType.REQUEST_TYPE, ReqType.START_SHUFFLER);
         param.put(ReqParam.RECIPIENT_SECRET_PHRASE, recipientSecretPhrase);
         param.put(ReqParam.SHUFFLING_FULL_HASH, shufflingFullHash);
+        param.put(ReqParam.ACCOUNT, wallet.getAccountId());
         param.put(ReqParam.FEE, "100000000000");
         param.put(ReqParam.DEADLINE, "1440");
 
@@ -2974,6 +3045,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
