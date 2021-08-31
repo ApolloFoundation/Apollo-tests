@@ -1,6 +1,7 @@
 package com.apollocurrrency.aplwallet.inttest.tests;
 
 import com.apollocurrency.aplwallet.api.dto.DGSGoodsDTO;
+import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
 import com.apollocurrency.aplwallet.api.response.CreateTransactionResponse;
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
 import com.apollocurrrency.aplwallet.inttest.helper.providers.WalletProvider;
@@ -26,8 +27,8 @@ public class TestMarketplace extends TestBaseNew {
     private String dgsName;
     private String description;
     private String tag;
-    private int price;
-    private int quantity;
+    private long price;
+    private long quantity;
     private final File image = TestConfiguration.getTestConfiguration().getDefaultImage();
     String symbols = "!@$^&*()_+{}:'./,\"";
 
@@ -52,7 +53,9 @@ public class TestMarketplace extends TestBaseNew {
         }
         this.tag = tags.toString();
         this.price = RandomUtils.nextInt(1, 1000);
-        this.quantity = RandomUtils.nextInt(10, 1000);
+        //this.quantity = RandomUtils.nextInt(10, 1000);
+        //this.price = 3000000000000000000L;
+        this.quantity = 999999990;
 
         log.info("DGS Name: {}", dgsName);
         log.info("DGS Tag: {}", tag);
@@ -76,8 +79,8 @@ public class TestMarketplace extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ArgumentsSource(WalletProvider.class)
     void quantityChangeTest(Wallet wallet) {
-        final int deltaQuantity = 10;
-        final int newPrice = 10;
+        final long deltaQuantity = 10;
+        final long newPrice = 10;
         CreateTransactionResponse dgs = dgsListing(wallet, dgsName, description, tag, quantity, price, image);
         verifyCreatingTransaction(dgs);
         verifyTransactionInBlock(dgs.getTransaction());
@@ -102,7 +105,7 @@ public class TestMarketplace extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ArgumentsSource(WalletProvider.class)
     void dgsPurchaseTest(Wallet wallet) {
-        Wallet randomWallet = getRandomStandartWallet();
+        Wallet randomWallet = getRandomStandardWallet();
         DGSGoodsDTO goodsDTO = null;
         CreateTransactionResponse delivery = null;
         CreateTransactionResponse purchase = null;
@@ -118,7 +121,7 @@ public class TestMarketplace extends TestBaseNew {
         goodsDTO = getDGSGood(dgs.getTransaction());
         log.info("DGS ID: {}", dgs.getTransaction());
 
-        purchase = dgsPurchase(randomWallet, dgs.getTransaction(), goodsDTO.getPriceATM(), 1, deliveryDeadlineTimeInHours);
+        purchase = dgsPurchase(randomWallet, dgs.getTransaction(), goodsDTO.getPriceATM(), 999999990, deliveryDeadlineTimeInHours);
         verifyCreatingTransaction(purchase);
         verifyTransactionInBlock(purchase.getTransaction());
         log.info("Purchase ID: {}", purchase.getTransaction());
@@ -143,9 +146,20 @@ public class TestMarketplace extends TestBaseNew {
 
 
     @Step
-    private Wallet getRandomStandartWallet() {
+    private Wallet getRandomStandardWallet() {
         String randomPass = String.valueOf(RandomUtils.nextInt(1, 199));
-        Wallet wallet = new Wallet(getAccountId(randomPass).getAccountRS(), randomPass);
+        AccountDTO accountDTO = getAccountId(randomPass);
+        Wallet wallet = new Wallet(accountDTO.getAccountRS(), accountDTO.getAccount(),randomPass);
+        log.info(String.format("Standard Wallet: %s pass: %s", wallet.getUser(), wallet.getPass()));
+
+        verifyTransactionInBlock(
+                sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), wallet.getUser(), 10000).getTransaction()
+        );
+        /*
+        verifyTransactionInBlock(
+                sendMoney(wallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
+        );
+         */
         log.info(String.format("Standard Wallet: %s pass: %s", wallet.getUser(), wallet.getPass()));
         return wallet;
     }

@@ -504,6 +504,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -526,6 +527,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -767,6 +769,7 @@ public class TestBaseNew extends TestBase {
                 .when()
                 .post(path)
                 .then()
+                .log().all()
                 .assertThat().statusCode(200)
                 .extract().body().jsonPath()
                 .getObject("", Account2FAResponse.class);
@@ -782,8 +785,13 @@ public class TestBaseNew extends TestBase {
             .spec(restHelper.getSpec())
             .contentType(ContentType.URLENC)
             .formParams(param)
-            .when().log().all()
-            .post(path).as(VaultWalletResponse.class);
+            .when().log()
+            .all()
+            .post(path)
+            .then()
+            .log().all()
+            .extract().body()
+            .as(VaultWalletResponse.class);
 
     }
 
@@ -1289,7 +1297,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse issueAsset(Wallet wallet, String assetName, String description, Integer quantityATU) {
+    public CreateTransactionResponse issueAsset(Wallet wallet, String assetName, String description, long quantityATU) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.ISSUE_ASSET);
@@ -1306,13 +1314,14 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
     }
 
     @Step
-    public CreateTransactionResponse placeBidOrder(Wallet wallet, String assetID, String priceATM, Integer quantityATU) {
+    public CreateTransactionResponse placeBidOrder(Wallet wallet, String assetID, String priceATM, long quantityATU) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.PLACE_BID_ORDER);
@@ -1335,7 +1344,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse placeAskOrder(Wallet wallet, String assetID, String priceATM, Integer quantityATU) {
+    public CreateTransactionResponse placeAskOrder(Wallet wallet, String assetID, String priceATM, long quantityATU) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.PLACE_ASK_ORDER);
@@ -1352,6 +1361,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -1837,6 +1847,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -2288,15 +2299,15 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse publishExchangeOffer(String currency, Wallet wallet, int buyRateATM, int sellRateATM, int initialBuySupply, int initialSellSupply) {
+    public CreateTransactionResponse publishExchangeOffer(String currency, Wallet wallet, long buyRateATM, long sellRateATM, long initialBuySupply, long initialSellSupply) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.PUBLISH_EXCHANGE_OFFER);
         param.put(ReqParam.CURRENCY, currency);
         param.put(ReqParam.BUY_RATE, String.valueOf(buyRateATM));
         param.put(ReqParam.SELL_RATE, String.valueOf(sellRateATM));
-        param.put(ReqParam.TOTAL_BUY_LIMIT, String.valueOf(1000));
-        param.put(ReqParam.TOTAL_SELL_LIMIT, String.valueOf(1000));
+        param.put(ReqParam.TOTAL_BUY_LIMIT, String.valueOf(Long.MAX_VALUE));
+        param.put(ReqParam.TOTAL_SELL_LIMIT, String.valueOf(Long.MAX_VALUE));
         param.put(ReqParam.INITIAL_BUY_SUPPLY, String.valueOf(initialBuySupply));
         param.put(ReqParam.INITIAL_SELL_SUPPLY, String.valueOf(initialSellSupply));
         param.put(ReqParam.EXPIRATION_HEIGHT, "999999999");
@@ -2310,13 +2321,14 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
     }
 
     @Step
-    public CreateTransactionResponse currencySell(String currency, Wallet wallet, int units, int rate) {
+    public CreateTransactionResponse currencySell(String currency, Wallet wallet, long units, long rate) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.CURRENCY_SELL);
@@ -2339,7 +2351,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse currencyBuy(String currency, Wallet wallet, int units, int rate) {
+    public CreateTransactionResponse currencyBuy(String currency, Wallet wallet, long units, long rate) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.CURRENCY_BUY);
@@ -2388,7 +2400,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
-    public CreateTransactionResponse scheduleCurrencyBuy(String currency, Wallet wallet, int units, int rate, String offerIssuer) {
+    public CreateTransactionResponse scheduleCurrencyBuy(String currency, Wallet wallet, long units, long rate, String offerIssuer) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.CURRENCY_BUY);
@@ -2672,7 +2684,7 @@ public class TestBaseNew extends TestBase {
             .getObject("", CreateTransactionResponse.class);
     }
     @Step
-    public CreateTransactionResponse dgsPriceChange(Wallet wallet, String transaction, int newPrice) {
+    public CreateTransactionResponse dgsPriceChange(Wallet wallet, String transaction, long newPrice) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.DGS_PRICE_CHANGE);
@@ -2688,12 +2700,13 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
     }
     @Step
-    public CreateTransactionResponse dgsQuantityChange(Wallet wallet, String transaction, int deltaQuantity) {
+    public CreateTransactionResponse dgsQuantityChange(Wallet wallet, String transaction, long deltaQuantity) {
 
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
@@ -2710,6 +2723,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -2732,7 +2746,7 @@ public class TestBaseNew extends TestBase {
             .getObject("", DGSGoodsDTO.class);
     }
     @Step
-    public CreateTransactionResponse dgsListing(Wallet wallet, String name, String description, String tags, int quantity, int priceATM, File image) {
+    public CreateTransactionResponse dgsListing(Wallet wallet, String name, String description, String tags, long quantity, long priceATM, File image) {
 
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
@@ -2755,12 +2769,13 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
     }
     @Step
-    public CreateTransactionResponse dgsRefund(Wallet wallet, String purchase, int refundATM, String message) {
+    public CreateTransactionResponse dgsRefund(Wallet wallet, String purchase, long refundATM, String message) {
         HashMap<String, String> param = new HashMap();
         param = restHelper.addWalletParameters(param,wallet);
         param.put(ReqType.REQUEST_TYPE, ReqType.DGS_REFUND);
@@ -2802,6 +2817,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);

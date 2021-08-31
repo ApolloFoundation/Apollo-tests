@@ -40,8 +40,7 @@ import java.util.concurrent.TimeUnit;
 import static com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration.getTestConfiguration;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ;
 import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
 
@@ -324,9 +323,12 @@ public abstract class TestBase {
         boolean inBlock = false;
         if (transaction != null) {
             try {
-                inBlock = Failsafe.with(retryPolicy).get(() -> getTransaction(transaction).getConfirmations() >= 0);
+                inBlock = Failsafe.with(retryPolicy).get(() -> {
+                    TransactionDTO trx =  getTransaction(transaction);
+                    assertNotNull(trx.getTransaction(),"Transactions removed from the mempool");
+                    return trx.getConfirmations() >= 0;});
             } catch (Exception e) {
-                fail("Transaction does't add to block. Transaction " + transaction + " Exception: " + e.getMessage());
+                fail("Transaction doesn't add to block. Transaction " + transaction + " Exception: " + e.getMessage());
             }
             assertTrue(inBlock, String.format("Transaction %s in block: ", transaction));
         }else{

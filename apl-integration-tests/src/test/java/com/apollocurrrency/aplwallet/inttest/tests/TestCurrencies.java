@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.validation.constraints.Negative;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +69,7 @@ public class TestCurrencies extends TestBaseNew {
     public void currencyBurn(int type,Wallet wallet) {
         log.info("Issue Currencies type: {}", type);
         //int supply = RandomUtils.nextInt(10, 1000);
-        long supply = 9223372036854775807L;
+        long supply = 3000000000000000000L;
         CreateTransactionResponse currency = issueCurrency(wallet, type,
                 RandomStringUtils.randomAlphabetic(5),
                 RandomStringUtils.randomAlphabetic(5),
@@ -89,7 +90,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyAll")
     public void deleteCurrency(int type, Wallet wallet) {
-        int supply = RandomUtils.nextInt(1, 1000);
+        //int supply = RandomUtils.nextInt(1, 1000);
+        long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -113,7 +115,7 @@ public class TestCurrencies extends TestBaseNew {
     @ArgumentsSource(WalletProvider.class)
     public void deleteCurrency(Wallet wallet) {
         //int supply = RandomUtils.nextInt(0, 1000);
-        long supply = 9223372036854775807L;
+        long supply = 3000000000000000000L;
         CreateTransactionResponse currency = issueCurrency(wallet, 1,
                 RandomStringUtils.randomAlphabetic(5),
                 RandomStringUtils.randomAlphabetic(5),
@@ -134,7 +136,7 @@ public class TestCurrencies extends TestBaseNew {
     @MethodSource("currencyExchangeable")
     public void transferCurrencyTest(int type,Wallet wallet) {
         //int supply = RandomUtils.nextInt(0, 1000);
-        long supply = 9223372036854775807L;
+        long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -182,8 +184,8 @@ public class TestCurrencies extends TestBaseNew {
         ArrayList<Wallet> wallets = new ArrayList<>();
         wallets.add(TestConfiguration.getTestConfiguration().getStandartWallet());
         wallets.add(TestConfiguration.getTestConfiguration().getVaultWallet());
-        int supply = RandomUtils.nextInt(10, 1000);
-
+        //int supply = RandomUtils.nextInt(10, 1000);
+        long supply = 3000000000000000000L;
             log.info("Issue Currencies type: {}", type);
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
@@ -203,7 +205,7 @@ public class TestCurrencies extends TestBaseNew {
             //EXCHANGEABLE - 1
             if ((type & 1) == 1) {
                 verifyTransactionInBlock(reserveClaimTransaction.getTransaction());
-                exchange(currency, wallet);
+                exchange(currency, wallet,supply);
 
             }
     }
@@ -214,7 +216,7 @@ public class TestCurrencies extends TestBaseNew {
     @MethodSource("currencyClaimableAndReservable")
     public void currencyReserveIncreaseTest(int type, Wallet wallet) {
         //int supply = RandomUtils.nextInt(1, 1000);
-        long supply = 9223372036854775806L;
+        long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -234,7 +236,7 @@ public class TestCurrencies extends TestBaseNew {
     @MethodSource("currencyExchangeable")
     public void publishExchangeOfferTest(int type, Wallet wallet) {
         //int supply = RandomUtils.nextInt(1, 1000);
-        long supply = 9223372036854775807L;
+        long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -243,8 +245,27 @@ public class TestCurrencies extends TestBaseNew {
                     supply,
                     RandomUtils.nextInt(0, 8));
             verifyCreatingTransaction(currency);
-            exchange(currency, wallet);
+            exchange(currency, wallet,supply);
         verifyTransactionInBlock(currency.getTransaction());
+
+    }
+
+
+    @DisplayName("Issue Currencies Negative")
+    @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
+    @MethodSource("currencyAll")
+    @Negative
+    public void issueCurrenciesNegative(int type,Wallet wallet) {
+        log.info("Issue Currencies type: {}", type);
+        long supply = Long.MAX_VALUE;
+        CreateTransactionResponse currency = issueCurrency(wallet, type,
+                RandomStringUtils.randomAlphabetic(5),
+                RandomStringUtils.randomAlphabetic(5),
+                RandomStringUtils.randomAlphabetic(5).toUpperCase(),
+                supply,
+                supply,
+                RandomUtils.nextInt(0, 8));
+       assertNull(currency.getSignatureHash());
 
     }
 
@@ -252,17 +273,18 @@ public class TestCurrencies extends TestBaseNew {
 
     @Step
     //TODO: Need implement amount verification after exchange
-    private void exchange(CreateTransactionResponse currency, Wallet wallet) {
+    private void exchange(CreateTransactionResponse currency, Wallet wallet, long supply) {
         verifyTransactionInBlock(currency.getTransaction());
-        CreateTransactionResponse offer = publishExchangeOffer(currency.getTransaction(), wallet, 1, 1, 1, 1);
+        CreateTransactionResponse offer = publishExchangeOffer(currency.getTransaction(), wallet, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
         verifyTransactionInBlock(offer.getTransaction());
         Wallet gen_wallet = TestConfiguration.getTestConfiguration().getGenesisWallet();
-        CreateTransactionResponse sellTransaction = currencySell(currency.getTransaction(), wallet, 1, 1);
+        CreateTransactionResponse sellTransaction = currencySell(currency.getTransaction(), wallet, Long.MAX_VALUE, Long.MAX_VALUE);
         verifyCreatingTransaction(sellTransaction);
-        CreateTransactionResponse buyTransaction = currencyBuy(currency.getTransaction(), gen_wallet, 1, 1);
+        CreateTransactionResponse buyTransaction = currencyBuy(currency.getTransaction(), gen_wallet, Long.MAX_VALUE, Long.MAX_VALUE);
         verifyCreatingTransaction(buyTransaction);
-        CreateTransactionResponse scheduledbuyTransaction = scheduleCurrencyBuy(currency.getTransaction(), gen_wallet, 1, 1, wallet.getUser());
+        CreateTransactionResponse scheduledbuyTransaction = scheduleCurrencyBuy(currency.getTransaction(), gen_wallet, Long.MAX_VALUE, Long.MAX_VALUE, wallet.getUser());
         verifyCreatingTransaction(scheduledbuyTransaction);
+
     }
 
 

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -203,10 +204,13 @@ public class TestShuffling extends TestBaseNew {
                     break;
 
                 case SHUFFLING_TYPE_ASSET:
-                    AccountAssetsResponse assets = getAccountAssets(wallet);
-                    String assetID = assets.getAccountAssets().stream()
-                            .filter(asset -> asset.getQuantityATU() > 10).findFirst().get().getAsset();
-                    assertNotNull(assets.getAccountAssets());
+                    String assetID;
+                    Integer quantityATU = 50;
+                    String assetName = "TR" + String.valueOf(new Date().getTime()).substring(7);
+                    CreateTransactionResponse issueAsset = issueAsset(wallet, assetName, "TransferAsset API test", quantityATU);
+                    verifyCreatingTransaction(issueAsset);
+                    assetID = issueAsset.getTransaction();
+                    verifyTransactionInBlock(assetID);
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomStandart.getUser()).getTransaction());
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomVault.getUser()).getTransaction());
                     shuffling = shufflingCreate(wallet, registrationPeriod, PARTICIPANT_COUNT, ASSET_AMOUNT, assetID, type);
@@ -259,10 +263,14 @@ public class TestShuffling extends TestBaseNew {
                     break;
 
                 case SHUFFLING_TYPE_ASSET:
-                    AccountAssetsResponse assets = getAccountAssets(wallet);
-                    String assetID = assets.getAccountAssets().stream()
-                            .filter(asset -> asset.getQuantityATU() > 10).findFirst().get().getAsset();
-                    assertNotNull(assets.getAccountAssets());
+
+                    String assetID;
+                    Integer quantityATU = 50;
+                    String assetName = "TR" + String.valueOf(new Date().getTime()).substring(7);
+                    CreateTransactionResponse issueAsset = issueAsset(wallet, assetName, "TransferAsset API test", quantityATU);
+                    verifyCreatingTransaction(issueAsset);
+                    assetID = issueAsset.getTransaction();
+                    verifyTransactionInBlock(assetID);
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomStandart.getUser()).getTransaction());
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomVault.getUser()).getTransaction());
                     shuffling = shufflingCreate(wallet, registrationPeriod, PARTICIPANT_COUNT, ASSET_AMOUNT, assetID, type);
@@ -272,7 +280,7 @@ public class TestShuffling extends TestBaseNew {
                     AccountCurrencyResponse currencies = getAccountCurrencies(wallet);
                     assertNotNull(currencies.getAccountCurrencies());
                     AccountCurrencyDTO currencyDTO = currencies.getAccountCurrencies().stream()
-                            .filter(currencie -> (currencie.getType() & NON_SHUFFLEABLE) != NON_SHUFFLEABLE)
+                            .filter(currency -> (currency.getType() & NON_SHUFFLEABLE) != NON_SHUFFLEABLE)
                             .findFirst().get();
                     verifyTransactionInBlock(transferCurrency(randomStandart.getUser(), currencyDTO.getCurrency(), wallet, 3).getTransaction());
                     verifyTransactionInBlock(transferCurrency(randomVault.getUser(), currencyDTO.getCurrency(), wallet, 3).getTransaction());
@@ -367,9 +375,11 @@ public class TestShuffling extends TestBaseNew {
                 sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), wallet.getUser(), 10000).getTransaction()
         );
 
+        /*
         verifyTransactionInBlock(
                 sendMoney(wallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
         );
+          */
         return wallet;
     }
 
@@ -390,6 +400,7 @@ public class TestShuffling extends TestBaseNew {
         verifyTransactionInBlock(
                 sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), vaultWallet.getUser(), 10000).getTransaction()
         );
+
         verifyTransactionInBlock(
                 sendMoney(vaultWallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
         );

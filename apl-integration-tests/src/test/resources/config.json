@@ -1,7 +1,7 @@
 {
-  "host": "localhost",
+  "host": "51.15.228.171",
   "port": "7876",
-  "adminPassword": "1",
+  "adminPassword": "12345",
   "defaultImage": "Icon.png",
   "standartWallet": {
     "user": "APL-AKU5-JP6B-Y42V-H5X8U",

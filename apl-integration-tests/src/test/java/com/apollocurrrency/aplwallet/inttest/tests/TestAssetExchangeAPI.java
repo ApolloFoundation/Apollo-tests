@@ -20,6 +20,7 @@ import com.apollocurrrency.aplwallet.inttest.model.TestBaseNew;
 import com.apollocurrrency.aplwallet.inttest.model.Wallet;
 import io.qameta.allure.Epic;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -313,16 +314,15 @@ public class TestAssetExchangeAPI extends TestBaseNew {
 
         String assetID;
         String orderID;
-        Integer quantityATU = 50;
+        long quantityATU = RandomUtils.nextInt(50, 1000);
         String assetName = "ASO" + String.valueOf(new Date().getTime()).substring(7);
-        CreateTransactionResponse cancelorderID;
         CreateTransactionResponse issueAsset = issueAsset(wallet, assetName, "issueAsset + placeAskOrder + getAskOrders", quantityATU);
         verifyCreatingTransaction(issueAsset);
         assetID = issueAsset.getTransaction();
         verifyTransactionInBlock(assetID);
         log.trace("Issue Asset API PASS: assetID = " + assetID);
 
-        CreateTransactionResponse placeAskOrder = placeAskOrder(wallet, assetID, "99", 10);
+        CreateTransactionResponse placeAskOrder = placeAskOrder(wallet, assetID, String.valueOf(quantityATU), quantityATU);
         verifyCreatingTransaction(placeAskOrder);
         verifyTransactionInBlock(placeAskOrder.getTransaction());
         orderID = placeAskOrder.getTransaction();
@@ -489,11 +489,13 @@ public class TestAssetExchangeAPI extends TestBaseNew {
     @ArgumentsSource(WalletProvider.class)
     public void issueAssetPlaceAskOrder(Wallet wallet) throws IOException {
         String assetID;
-        CreateTransactionResponse issueAsset = issueAsset(wallet, "APIORDER9", "Integration Test Asset", 100);
+        //long amount = 3000000000000000000L;
+        long amount = RandomUtils.nextInt(50, 1000);
+        CreateTransactionResponse issueAsset = issueAsset(wallet, RandomStringUtils.randomAlphabetic(5), "Integration Test Asset", amount);
         verifyCreatingTransaction(issueAsset);
         assetID = issueAsset.getTransaction();
         verifyTransactionInBlock(assetID);
-        verifyCreatingTransaction(placeAskOrder(wallet, assetID, "99", 10));
+        verifyCreatingTransaction(placeAskOrder(wallet, assetID, String.valueOf(amount), amount));
     }
 
     @DisplayName("Issue Asset -> Place Ask Order -> Cancel Ask Order")
@@ -502,7 +504,7 @@ public class TestAssetExchangeAPI extends TestBaseNew {
     public void issueAssetPlaceCancelAskOrder(Wallet wallet) throws IOException {
         String assetID;
         String orderID;
-        CreateTransactionResponse issueAsset = issueAsset(wallet, "APIASK0", "Integration Test Asset", 50);
+        CreateTransactionResponse issueAsset = issueAsset(wallet, RandomStringUtils.randomAlphabetic(5), "Integration Test Asset", 50);
         verifyCreatingTransaction(issueAsset);
         assetID = issueAsset.getTransaction();
         verifyTransactionInBlock(assetID);
@@ -519,11 +521,28 @@ public class TestAssetExchangeAPI extends TestBaseNew {
     @ArgumentsSource(WalletProvider.class)
     public void issueAssetPlaceBidOrder(Wallet wallet) throws IOException {
         String assetID;
-        CreateTransactionResponse issueAsset = issueAsset(wallet, "APIBID", "Integration Test Asset", 60);
+        //long amount = 3000000000000000000L;
+        long amount = RandomUtils.nextInt(50, 1000);
+        CreateTransactionResponse issueAsset = issueAsset(wallet,  RandomStringUtils.randomAlphabetic(5), "Integration Test Asset", amount);
         verifyCreatingTransaction(issueAsset);
         assetID = issueAsset.getTransaction();
         verifyTransactionInBlock(assetID);
-        verifyCreatingTransaction(placeBidOrder(wallet, assetID, "99", 10));
+        verifyCreatingTransaction(placeBidOrder(wallet, assetID, String.valueOf(amount), amount));
+    }
+
+    @DisplayName("Issue Asset -> Place Bid Order -> Place Ask Order")
+    @ParameterizedTest(name = "{displayName} {arguments}")
+    @ArgumentsSource(WalletProvider.class)
+    public void assetExchange(Wallet wallet) throws IOException {
+        //long amount = 3000000000000000000L;
+        long amount = RandomUtils.nextInt(50, 1000);
+        String assetID;
+        CreateTransactionResponse issueAsset = issueAsset(wallet,  RandomStringUtils.randomAlphabetic(5), "Integration Test Asset", amount);
+        verifyCreatingTransaction(issueAsset);
+        assetID = issueAsset.getTransaction();
+        verifyTransactionInBlock(assetID);
+        verifyCreatingTransaction(placeBidOrder(wallet, assetID, String.valueOf(amount), amount));
+        verifyCreatingTransaction(placeAskOrder(wallet, assetID, String.valueOf(amount), amount));
     }
 
     @DisplayName("Issue Asset -> Place Bid Order -> Cancel Bid Order")
