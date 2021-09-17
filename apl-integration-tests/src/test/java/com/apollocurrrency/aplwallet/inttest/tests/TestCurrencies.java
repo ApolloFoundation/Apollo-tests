@@ -184,8 +184,8 @@ public class TestCurrencies extends TestBaseNew {
         ArrayList<Wallet> wallets = new ArrayList<>();
         wallets.add(TestConfiguration.getTestConfiguration().getStandartWallet());
         wallets.add(TestConfiguration.getTestConfiguration().getVaultWallet());
-        //int supply = RandomUtils.nextInt(10, 1000);
-        long supply = 3000000000000000000L;
+        int supply = RandomUtils.nextInt(10, 1000);
+       // long supply = 3000000000000000000L;
             log.info("Issue Currencies type: {}", type);
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
@@ -215,8 +215,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyClaimableAndReservable")
     public void currencyReserveIncreaseTest(int type, Wallet wallet) {
-        //int supply = RandomUtils.nextInt(1, 1000);
-        long supply = 3000000000000000000L;
+        int supply = RandomUtils.nextInt(1, 1000);
+        //long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -235,8 +235,8 @@ public class TestCurrencies extends TestBaseNew {
     @ParameterizedTest(name = "{displayName} Currency type: {0} Wallet type: {1}")
     @MethodSource("currencyExchangeable")
     public void publishExchangeOfferTest(int type, Wallet wallet) {
-        //int supply = RandomUtils.nextInt(1, 1000);
-        long supply = 3000000000000000000L;
+        int supply = RandomUtils.nextInt(1, 1000);
+       // long supply = 3000000000000000000L;
             CreateTransactionResponse currency = issueCurrency(wallet, type,
                     RandomStringUtils.randomAlphabetic(5),
                     RandomStringUtils.randomAlphabetic(5),
@@ -275,14 +275,14 @@ public class TestCurrencies extends TestBaseNew {
     //TODO: Need implement amount verification after exchange
     private void exchange(CreateTransactionResponse currency, Wallet wallet, long supply) {
         verifyTransactionInBlock(currency.getTransaction());
-        CreateTransactionResponse offer = publishExchangeOffer(currency.getTransaction(), wallet, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
+        CreateTransactionResponse offer = publishExchangeOffer(currency.getTransaction(), wallet, supply, supply, supply, supply);
         verifyTransactionInBlock(offer.getTransaction());
         Wallet gen_wallet = TestConfiguration.getTestConfiguration().getGenesisWallet();
-        CreateTransactionResponse sellTransaction = currencySell(currency.getTransaction(), wallet, Long.MAX_VALUE, Long.MAX_VALUE);
+        CreateTransactionResponse sellTransaction = currencySell(currency.getTransaction(), wallet, supply, supply);
         verifyCreatingTransaction(sellTransaction);
-        CreateTransactionResponse buyTransaction = currencyBuy(currency.getTransaction(), gen_wallet, Long.MAX_VALUE, Long.MAX_VALUE);
+        CreateTransactionResponse buyTransaction = currencyBuy(currency.getTransaction(), gen_wallet, supply, supply);
         verifyCreatingTransaction(buyTransaction);
-        CreateTransactionResponse scheduledbuyTransaction = scheduleCurrencyBuy(currency.getTransaction(), gen_wallet, Long.MAX_VALUE, Long.MAX_VALUE, wallet.getUser());
+        CreateTransactionResponse scheduledbuyTransaction = scheduleCurrencyBuy(currency.getTransaction(), gen_wallet, supply, supply, wallet.getUser());
         verifyCreatingTransaction(scheduledbuyTransaction);
 
     }

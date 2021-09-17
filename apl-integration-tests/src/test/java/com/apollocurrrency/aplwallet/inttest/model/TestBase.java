@@ -49,7 +49,7 @@ public abstract class TestBase {
     public static final Logger log = LoggerFactory.getLogger(TestBase.class);
     public static RetryPolicy retryPolicy = new RetryPolicy()
         .retryWhen(false)
-        .withMaxRetries(50)
+        .withMaxRetries(20)
         .withDelay(10, TimeUnit.SECONDS);
     static RestHelper restHelper = RestHelper.getRestHelper();
 
@@ -325,6 +325,7 @@ public abstract class TestBase {
             try {
                 inBlock = Failsafe.with(retryPolicy).get(() -> {
                     TransactionDTO trx =  getTransaction(transaction);
+                    log.info("Waiting for confirmation trx: {}", transaction);
                     assertNotNull(trx.getTransaction(),"Transactions removed from the mempool");
                     return trx.getConfirmations() >= 0;});
             } catch (Exception e) {

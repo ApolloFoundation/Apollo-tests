@@ -276,6 +276,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", SearchAccountsResponse.class);
@@ -1087,7 +1088,9 @@ public class TestBaseNew extends TestBase {
                 .formParams(param)
                 .when()
                 .get(path)
-                .getBody().as(Account2FAResponse.class);
+                .then().log().all()
+                .extract().body()
+                 .as(Account2FAResponse.class);
     }
 
     @Step
@@ -1157,6 +1160,8 @@ public class TestBaseNew extends TestBase {
             .formParams(param)
             .when()
             .post(path)
+            .then().log().all()
+            .extract().body()
             .as(CreateDexOrderResponse.class);
     }
 
@@ -1222,8 +1227,11 @@ public class TestBaseNew extends TestBase {
             .contentType(ContentType.URLENC)
             .formParams(param)
             .when()
-            .log().body()
+            .log().all()
             .post(path)
+            .then()
+            .log().all()
+            .extract().body()
             .as(DexAccountInfoResponse.class);
     }
 

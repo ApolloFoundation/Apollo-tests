@@ -140,6 +140,7 @@ public class TestAccounts extends TestBaseNew {
     @Flaky
     public void testGetUnconfirmedTransactions(Wallet wallet) throws IOException {
         sendMoneyReference(wallet, getTestConfiguration().getStandartWallet().getUser(), 2,"addd79bbbbc15c6c556ceb5e1625056c7b24a3dcce914ceb439b97919a0afdd6");
+        waitForHeight(getBlock().getHeight() +1);
         TransactionListResponse transactionsInfo = getUnconfirmedTransactions(wallet);
         assertNotNull(transactionsInfo.getUnconfirmedTransactions());
         assertThat(transactionsInfo.getUnconfirmedTransactions().size(),greaterThan(0));
@@ -289,7 +290,6 @@ public class TestAccounts extends TestBaseNew {
     @DisplayName("Generate Account")
     @Test
     public void generateAccount() {
-        ;
         Account2FAResponse accountDTO = generateNewAccount();
         assertNotNull(accountDTO.getAccountRS());
         assertNotNull(accountDTO.getPassphrase());
