@@ -26,6 +26,7 @@
 hs_err_pid*
 
 /workspace.xml
+allure-results/
 .allure/
 target/
 .idea/
