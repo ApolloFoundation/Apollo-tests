@@ -1,6 +1,7 @@
 package com.apollocurrrency.aplwallet.inttest.model;
 
 import com.apollocurrency.aplwallet.api.dto.AccountAliasDTO;
+import com.apollocurrency.aplwallet.api.dto.Wallets;
 import com.apollocurrency.aplwallet.api.dto.account.AccountAssetDTO;
 import com.apollocurrency.aplwallet.api.dto.AccountAssetOrderDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
@@ -20,6 +21,7 @@ import com.apollocurrency.aplwallet.api.dto.ShardDTO;
 import com.apollocurrency.aplwallet.api.dto.TaggedDataDTO;
 import com.apollocurrency.aplwallet.api.dto.TransactionDTO;
 import com.apollocurrency.aplwallet.api.dto.TradingDataOutputDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.p2p.PeerInfo;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountAliasesResponse;
@@ -741,7 +743,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step("Generate New Account")
-    public Account2FAResponse generateNewAccount() {
+    public CurrenciesWalletsDTO generateNewAccount() {
         HashMap<String, String> param = new HashMap();
         param.put(ReqType.REQUEST_TYPE, ReqType.GENERATE_ACCOUNT);
         return given().log().all()
@@ -753,7 +755,7 @@ public class TestBaseNew extends TestBase {
                 .then()
                 .assertThat().statusCode(200)
                 .extract().body().jsonPath()
-                .getObject("", Account2FAResponse.class);
+                .getObject("", CurrenciesWalletsDTO.class);
     }
 
     @Step("Delete Secret File")

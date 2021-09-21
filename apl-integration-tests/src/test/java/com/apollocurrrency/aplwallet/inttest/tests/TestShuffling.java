@@ -5,6 +5,7 @@ package com.apollocurrrency.aplwallet.inttest.tests;
 import com.apollocurrency.aplwallet.api.dto.ShufflingParticipant;
 import com.apollocurrency.aplwallet.api.dto.account.AccountCurrencyDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountAssetsResponse;
 import com.apollocurrency.aplwallet.api.response.AccountCurrencyResponse;
@@ -393,18 +394,19 @@ public class TestShuffling extends TestBaseNew {
 
     @Step
     private Wallet getRandomVaultWallet() {
-        Account2FAResponse account = generateNewAccount();
-        Wallet vaultWallet = new Wallet(account.getAccountRS(), account.getPassphrase(), true,account.getAccount());
-        log.info(String.format("Vault Wallet: %s pass: %s", vaultWallet.getUser(), vaultWallet.getPass()));
-
-        verifyTransactionInBlock(
-                sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), vaultWallet.getUser(), 10000).getTransaction()
-        );
-
-        verifyTransactionInBlock(
-                sendMoney(vaultWallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
-        );
-        return vaultWallet;
+        CurrenciesWalletsDTO account = generateNewAccount();
+//        Wallet vaultWallet = new Wallet(account.getAccountRS(), account.getPassphrase(), true,account.getAccount());
+//        log.info(String.format("Vault Wallet: %s pass: %s", vaultWallet.getUser(), vaultWallet.getPass()));
+//
+//        verifyTransactionInBlock(
+//                sendMoney(TestConfiguration.getTestConfiguration().getGenesisWallet(), vaultWallet.getUser(), 10000).getTransaction()
+//        );
+//
+//        verifyTransactionInBlock(
+//                sendMoney(vaultWallet, TestConfiguration.getTestConfiguration().getGenesisWallet().getUser(), 10).getTransaction()
+//        );
+//        return vaultWallet;
+        return null;
     }
 
     @Step
