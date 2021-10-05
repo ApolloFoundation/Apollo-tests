@@ -20,6 +20,7 @@ import com.apollocurrency.aplwallet.api.dto.ShardDTO;
 import com.apollocurrency.aplwallet.api.dto.TaggedDataDTO;
 import com.apollocurrency.aplwallet.api.dto.TransactionDTO;
 import com.apollocurrency.aplwallet.api.dto.TradingDataOutputDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.p2p.PeerInfo;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountAliasesResponse;
@@ -203,6 +204,25 @@ public class TestBaseNew extends TestBase {
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", AccountDTO.class);
+    }
+
+    @Step
+    public AccountDTO getAccountIdByPublicKey(String publicKey) {
+        HashMap<String, String> param = new HashMap();
+        param.put(ReqType.REQUEST_TYPE, ReqType.GET_ACCOUNT_ID);
+        param.put(ReqParam.PUBLIC_KEY, publicKey);
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.URLENC)
+                .formParams(param)
+                .when()
+                .get(path)
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", AccountDTO.class);
     }
 
 
@@ -741,7 +761,7 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step("Generate New Account")
-    public Account2FAResponse generateNewAccount() {
+    public CurrenciesWalletsDTO generateNewAccount() {
         HashMap<String, String> param = new HashMap();
         param.put(ReqType.REQUEST_TYPE, ReqType.GENERATE_ACCOUNT);
         return given().log().all()
@@ -751,9 +771,10 @@ public class TestBaseNew extends TestBase {
                 .when()
                 .post(path)
                 .then()
+                .log().all()
                 .assertThat().statusCode(200)
                 .extract().body().jsonPath()
-                .getObject("", Account2FAResponse.class);
+                .getObject("", CurrenciesWalletsDTO.class);
     }
 
     @Step("Delete Secret File")
@@ -1434,6 +1455,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
@@ -1796,6 +1818,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", ExpectedAssetDeletes.class);
@@ -2103,6 +2126,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", PollResultResponse.class);
@@ -2515,6 +2539,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", PollResultResponse.class);

@@ -1,6 +1,8 @@
 package com.apollocurrrency.aplwallet.inttest.tests;
 
+import com.apollocurrency.aplwallet.api.dto.WalletDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.dto.auth.Status2FA;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.VaultWalletResponse;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 ;import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Secret File")
 @Epic(value = "Secret File")
@@ -30,8 +33,11 @@ public class Test2FA extends TestBaseNew {
     @Test
     @Description("Delete Secret Key")
     public void deleteKey() throws JsonProcessingException {
-        Account2FAResponse accountDTO = generateNewAccount();
-        Wallet wallet = new Wallet(accountDTO.getAccount(), accountDTO.getPassphrase(), null, true, null, null);
+        CurrenciesWalletsDTO currenciesWalletsDTO = generateNewAccount();
+        assertNotNull(currenciesWalletsDTO.getCurrencies().get(0));
+        WalletDTO accountDTO = currenciesWalletsDTO.getCurrencies().get(0).getWallets().get(0);
+        assertNotNull(accountDTO);
+        Wallet wallet = new Wallet(accountDTO.getAddress(), currenciesWalletsDTO.getPassphrase(), null, true, null, null);
         Account2FAResponse deletedAccount = deleteSecretFile(wallet);
         assertEquals(Status2FA.OK, deletedAccount.getStatus());
     }
@@ -40,10 +46,13 @@ public class Test2FA extends TestBaseNew {
     @DisplayName("Export Secret Key")
     @Test
     public void exportKey() throws JsonProcessingException {
-        Account2FAResponse accountDTO = generateNewAccount();
-        Wallet wallet = new Wallet(accountDTO.getAccountRS(), accountDTO.getPassphrase(), null, true, null, null);
+        CurrenciesWalletsDTO currenciesWalletsDTO = generateNewAccount();
+        assertNotNull(currenciesWalletsDTO.getCurrencies().get(0));
+        WalletDTO accountDTO = currenciesWalletsDTO.getCurrencies().get(0).getWallets().get(0);
+        assertNotNull(accountDTO);
+        Wallet wallet = new Wallet(accountDTO.getAddress(), currenciesWalletsDTO.getPassphrase(), null, true, null, null);
         VaultWalletResponse secretFile = exportSecretFile(wallet);
-        Assertions.assertTrue(secretFile.getFileName().contains(accountDTO.getAccountRS()));
+        Assertions.assertTrue(secretFile.getFileName().contains(accountDTO.getAddress()));
         Assertions.assertNotNull(secretFile.getFileName());
     }
 

@@ -1,8 +1,10 @@
 package com.apollocurrrency.aplwallet.inttest.tests;
 
+import com.apollocurrency.aplwallet.api.dto.WalletDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
 import com.apollocurrency.aplwallet.api.dto.BalanceDTO;
 import com.apollocurrency.aplwallet.api.dto.EntryDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountBlockIdsResponse;
 import com.apollocurrency.aplwallet.api.response.AccountLedgerResponse;
@@ -290,11 +292,13 @@ public class TestAccounts extends TestBaseNew {
     @DisplayName("Generate Account")
     @Test
     public void generateAccount() {
-        Account2FAResponse accountDTO = generateNewAccount();
-        assertNotNull(accountDTO.getAccountRS());
-        assertNotNull(accountDTO.getPassphrase());
+        CurrenciesWalletsDTO currenciesWalletsDTO = generateNewAccount();
+        assertNotNull(currenciesWalletsDTO.getCurrencies().get(0));
+        WalletDTO accountDTO = currenciesWalletsDTO.getCurrencies().get(0).getWallets().get(0);
+        assertNotNull(accountDTO);
+        assertNotNull(accountDTO.getAddress());
+        assertNotNull(currenciesWalletsDTO.getPassphrase());
         assertNotNull(accountDTO.getPublicKey());
-        assertNotNull(accountDTO.getAccount());
     }
 
     @DisplayName("Lease Balance")

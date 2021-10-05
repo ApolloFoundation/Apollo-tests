@@ -3,8 +3,10 @@ package com.apollocurrrency.aplwallet.inttest.tests;
 
 
 import com.apollocurrency.aplwallet.api.dto.ShufflingParticipant;
+import com.apollocurrency.aplwallet.api.dto.WalletDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountCurrencyDTO;
 import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
+import com.apollocurrency.aplwallet.api.dto.account.CurrenciesWalletsDTO;
 import com.apollocurrency.aplwallet.api.response.Account2FAResponse;
 import com.apollocurrency.aplwallet.api.response.AccountAssetsResponse;
 import com.apollocurrency.aplwallet.api.response.AccountCurrencyResponse;
@@ -393,8 +395,14 @@ public class TestShuffling extends TestBaseNew {
 
     @Step
     private Wallet getRandomVaultWallet() {
-        Account2FAResponse account = generateNewAccount();
-        Wallet vaultWallet = new Wallet(account.getAccountRS(), account.getPassphrase(), true,account.getAccount());
+        CurrenciesWalletsDTO currenciesWalletsDTO = generateNewAccount();
+        assertNotNull(currenciesWalletsDTO.getCurrencies().get(0));
+        WalletDTO accountDTO = currenciesWalletsDTO.getCurrencies().get(0).getWallets().get(0);
+        assertNotNull(accountDTO);
+        AccountDTO account = getAccountIdByPublicKey(accountDTO.getPublicKey());
+        assertEquals(accountDTO.getAddress(),account.getAccountRS());
+
+        Wallet vaultWallet = new Wallet(account.getAccountRS(), currenciesWalletsDTO.getPassphrase(), true, account.getAccount());
         log.info(String.format("Vault Wallet: %s pass: %s", vaultWallet.getUser(), vaultWallet.getPass()));
 
         verifyTransactionInBlock(
