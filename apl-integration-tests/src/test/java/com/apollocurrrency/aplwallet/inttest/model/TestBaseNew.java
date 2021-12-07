@@ -70,6 +70,8 @@ import com.apollocurrency.aplwallet.api.response.VaultWalletResponse;
 import com.apollocurrency.aplwallet.api.response.WithdrawResponse;
 
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.*;
+import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
@@ -108,6 +110,7 @@ public class TestBaseNew extends TestBase {
             .when()
             .get(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", TransactionDTO.class);
@@ -2377,9 +2380,29 @@ public class TestBaseNew extends TestBase {
             .when()
             .post(path)
             .then()
+            .log().all()
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
+    }
+
+    @Step
+    public CreateTransactionResponse broadcastTransaction(String transactionBytes) {
+        HashMap<String, String> param = new HashMap();
+        param.put(ReqType.REQUEST_TYPE, ReqType.BROADCAST_TRANSACTION);
+        param.put(ReqParam.TRANSACTION_BYTES, transactionBytes);
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.URLENC)
+                .formParams(param)
+                .when()
+                .post(path)
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", CreateTransactionResponse.class);
     }
 
     @Step
@@ -3098,6 +3121,91 @@ public class TestBaseNew extends TestBase {
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", CreateTransactionResponse.class);
+
+    }
+
+
+    @Step
+    public TrxResponse createSC(CreateSmartContract requestBody) {
+          return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/publish")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse balanceOf(SCBalanceOfRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/read")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse lockOf(SCLockOfRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/read")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scBuyTokens(SCBuyRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scUnlockTokens(SCUnlockRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
 
     }
 

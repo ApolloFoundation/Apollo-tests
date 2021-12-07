@@ -75,7 +75,7 @@ public abstract class TestBase {
 
             importSecretFileSetUp(secretFilePath, TestConfiguration.getTestConfiguration().getVaultWallet().getPass());
             //startForgingSetUp();
-            setUpTestData();
+            //setUpTestData();
 
         log.info("Preconditions finished");
     }
@@ -321,6 +321,7 @@ public abstract class TestBase {
     @Step
     public boolean verifyTransactionInBlock(String transaction) {
         boolean inBlock = false;
+        log.info("trx id: {}",transaction);
         if (transaction != null) {
             try {
                 inBlock = Failsafe.with(retryPolicy).get(() -> {
@@ -355,6 +356,10 @@ public abstract class TestBase {
             .assertThat().statusCode(200)
             .extract().body().jsonPath()
             .getObject("", TransactionDTO.class);
+    }
+
+    public String convertToAtom(String value){
+        return String.valueOf(Long.parseLong(value) * 100000000L);
     }
 
 

@@ -149,5 +149,9 @@ public class ReqType {
     public static final String GET_DATA_TAG_COUNT = "getDataTagCount";
     public static final String SEARCH_TAGGED_DATA = "searchTaggedData";
     public static final String EXTEND_TAGGED_DATA = "extendTaggedData";
+    public static final String BROADCAST_TRANSACTION = "broadcastTransaction";
+
+
+
 
 }

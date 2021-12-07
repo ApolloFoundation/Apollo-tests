@@ -111,10 +111,9 @@ public class TestShuffling extends TestBaseNew {
                     break;
 
                 case SHUFFLING_TYPE_ASSET:
-                    AccountAssetsResponse assets = getAccountAssets(wallet);
-                    String assetID = assets.getAccountAssets().stream()
-                            .filter(asset -> asset.getQuantityATU() > 10).findFirst().get().getAsset();
-                    assertNotNull(assets.getAccountAssets());
+                    CreateTransactionResponse issueAsset = issueAsset(wallet, RandomStringUtils.randomAlphabetic(6), RandomStringUtils.randomAlphabetic(10), 10);
+                    verifyTransactionInBlock(issueAsset.getTransaction());
+                    String assetID = issueAsset.getTransaction();
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomStandart.getUser()).getTransaction());
                     verifyTransactionInBlock(transferAsset(wallet, assetID, 3, randomVault.getUser()).getTransaction());
                     shuffling = shufflingCreate(wallet, registrationPeriod, PARTICIPANT_COUNT, ASSET_AMOUNT, assetID, type);

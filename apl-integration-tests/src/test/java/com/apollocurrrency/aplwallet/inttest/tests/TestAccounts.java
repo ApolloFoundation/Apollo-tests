@@ -151,7 +151,7 @@ public class TestAccounts extends TestBaseNew {
     @Test
     @DisplayName("Verify Unconfirmed Transactions Ids endpoint")
     public void testGetUnconfirmedTransactionsIds() throws IOException {
-        sendMoneyReference(getTestConfiguration().getStandartWallet(), getTestConfiguration().getStandartWallet().getUser(), 2,"test hash");
+        sendMoneyReference(getTestConfiguration().getStandartWallet(), getTestConfiguration().getStandartWallet().getUser(), 2,"9ea31651af2cc95138633e269530106bab835c45596b6539dd0fcbd575b63aec");
         AccountTransactionIdsResponse accountTransactionIdsResponse = Failsafe.with(retryPolicy).get(() -> getUnconfirmedTransactionIds(getTestConfiguration().getStandartWallet().getUser()));
         assertThat(accountTransactionIdsResponse.getUnconfirmedTransactionIds().size() , greaterThan(0));
     }

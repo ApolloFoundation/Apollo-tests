@@ -172,6 +172,6 @@ public class ReqParam {
     public static final String ETH_WALLET_ADDRESS = "walletAddress";
     public static final String VALIDATE = "validate";
     public static final String REFERENCED_TRANSACTION_FULL_HASH = "referencedTransactionFullHash";
-
+    public static final String TRANSACTION_BYTES = "transactionBytes";
 
 }

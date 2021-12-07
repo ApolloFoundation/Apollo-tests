@@ -5,7 +5,7 @@
 
   <groupId>apl-integration-tests</groupId>
   <artifactId>apl-integration-tests</artifactId>
-  <version>1.48.4</version>
+  <version>1.48.5</version>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>com.apollocurrency</groupId>
       <artifactId>apl-api</artifactId>
-      <version>1.48.4</version>
+      <version>1.50.22</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -140,6 +140,12 @@
       <artifactId>allure-environment-writer</artifactId>
       <version>1.0.0</version>
     </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.15</version>
+    </dependency>
+
   </dependencies>
 
   <build>

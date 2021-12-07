@@ -55,7 +55,6 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Epic(value = "Dex")
 @ExtendWith(DexPreconditionExtension.class)
 @Execution(CONCURRENT)
-@Disabled
 public class TestDex extends TestBaseNew {
 
 
@@ -172,11 +171,11 @@ public class TestDex extends TestBaseNew {
     @BeforeEach
     public void logInDexExchange(){
         DexAccountInfoResponse vault1Log = logInDex(vault1);
-        assertTrue(vault1Log.getCurrencies().get(0).getCurrency().equals("eth"), "response isn't correct for vault1");
-        assertTrue(vault1Log.getCurrencies().get(0).getWallets().get(0).getAddress().equals(vault1.getEthAddress()), "response isn't correct for vault1");
+        assertTrue(vault1Log.getCurrencies().get(1).getCurrency().equals("eth"), "response isn't correct for vault1");
+        assertTrue(vault1Log.getCurrencies().get(1).getWallets().get(0).getAddress().equals(vault1.getEthAddress()), "response isn't correct for vault1");
         DexAccountInfoResponse vault2Log = logInDex(vault2);
-        assertTrue(vault2Log.getCurrencies().get(0).getCurrency().equals("eth"), "response isn't correct for vault2");
-        assertTrue(vault2Log.getCurrencies().get(0).getWallets().get(0).getAddress().equals(vault2.getEthAddress()), "response isn't correct for vault2");
+        assertTrue(vault2Log.getCurrencies().get(1).getCurrency().equals("eth"), "response isn't correct for vault2");
+        assertTrue(vault2Log.getCurrencies().get(1).getWallets().get(0).getAddress().equals(vault2.getEthAddress()), "response isn't correct for vault2");
     }
 
     @BeforeAll
