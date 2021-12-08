@@ -34,7 +34,7 @@ public class SmartContracts extends TestBaseNew {
         String symbol = "INT";
         String cap = "100";
         String init = "50";
-        rate = "1";
+        //String rate = "1";
         String buyAmountAPL = "10";
 
 
@@ -57,7 +57,7 @@ public class SmartContracts extends TestBaseNew {
 
         TransactionDTO sc = getTransaction(trxId);
 
-        verifyBalanceOf(init,sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyBalanceOf(convertToAtom(init), sc.getRecipientRS(),"0xfd1ba38548944743");
 
         SCBuyRequest scBuyRequest = new SCBuyRequest(
                     sc.getRecipientRS(),
@@ -70,9 +70,8 @@ public class SmartContracts extends TestBaseNew {
         verifyTransactionInBlock(trxId);
 
 
-
-        verifyLockOf(String.valueOf(Long.parseLong(buyAmountAPL) * Long.parseLong(rate)),
-                sc.getRecipientRS(),"0xfd1ba38548944743");
+        String balanceLockOf = String.valueOf(Long.parseLong(buyAmountAPL) * Float.valueOf(Float.parseFloat(rate) * 100000000L).longValue());
+        verifyLockOf(balanceLockOf, sc.getRecipientRS(),"0xfd1ba38548944743");
 
         SCUnlockRequest scUnlockRequest = new SCUnlockRequest(
                 sc.getRecipientRS(),
@@ -83,8 +82,10 @@ public class SmartContracts extends TestBaseNew {
         trxId = broadcastTransaction(unlockResponse.getTx()).getTransaction();
         verifyTransactionInBlock(trxId);
 
-        verifyLockOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyBalanceOf("60",sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyLockOf(convertToAtom("0"),sc.getRecipientRS(),"0xfd1ba38548944743");
+
+        String balanceOf = String.valueOf(Long.parseLong(balanceLockOf) + Long.parseLong(convertToAtom(init)));
+        verifyBalanceOf(balanceOf,sc.getRecipientRS(),"0xfd1ba38548944743");
 
 
     }
@@ -92,21 +93,22 @@ public class SmartContracts extends TestBaseNew {
     void verifyBalanceOf(String expectedResult, String scAddress,String account){
         SCBalanceOfRequest balanceReq = new SCBalanceOfRequest(scAddress,account);
         TrxResponse balanceResponse = balanceOf(balanceReq);
-        assertEquals(convertToAtom(expectedResult), balanceResponse.getResults().get(0).getOutput().get(0),"Balance does not match");
+        assertEquals(expectedResult, balanceResponse.getResults().get(0).getOutput().get(0),"Balance does not match");
 
     }
 
     void verifyLockOf(String expectedResult, String scAddress,String account){
         SCLockOfRequest balanceReq = new SCLockOfRequest(scAddress,account);
         TrxResponse balanceResponse = lockOf(balanceReq);
-        assertEquals(convertToAtom(expectedResult),balanceResponse.getResults().get(0).getOutput().get(0),"Balance does not match");
+        assertEquals(expectedResult,balanceResponse.getResults().get(0).getOutput().get(0),"Balance does not match");
         log.info("LockOf balance: ");
     }
 
 
 
     private static Stream<String> scRate() {
-        return Stream.of("1", "0.01", "0.001", "0.00000001", "10", "100");
+        //return Stream.of("1","0.01", "0.001", "0.00000001", "10", "100");
+        return Stream.of("1","1", "1", "1", "1", "1");
 
     }
 

@@ -8,8 +8,8 @@ public class SCSourceFactory {
 
     public String createSCSCSource(SCType type,String name,String symbol,String cap,String initSupply,String rate) {
         String source = null;
-        String atomCap =  String.valueOf(Float.valueOf(Float.parseFloat(cap) * 100000000L).longValue());
-        String atomInitSupply =  String.valueOf(Float.valueOf(Float.parseFloat(initSupply) * 100000000L).longValue());
+        String atomCap =  String.valueOf(Long.parseLong(cap) * 100000000L);
+        String atomInitSupply =  String.valueOf(Long.parseLong(initSupply) * 100000000L);
         String atomRate = String.valueOf(Float.valueOf(Float.parseFloat(rate) * 100000000L).longValue());
 
         switch (type) {
