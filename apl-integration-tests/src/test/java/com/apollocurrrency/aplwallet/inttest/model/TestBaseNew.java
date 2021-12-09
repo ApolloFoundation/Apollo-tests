@@ -70,7 +70,14 @@ import com.apollocurrency.aplwallet.api.response.VaultWalletResponse;
 import com.apollocurrency.aplwallet.api.response.WithdrawResponse;
 
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.*;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCAllowanceOfRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCBalanceOfRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCLockOfRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCTotalSupplyRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.CreateSmartContract;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCApproveRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCBuyRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCUnlockRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.qameta.allure.Step;
@@ -3193,7 +3200,58 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
+    public TrxResponse scTotalSupply(SCTotalSupplyRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/read")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scAllowanceOf(SCAllowanceOfRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/read")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
     public TrxResponse scUnlockTokens(SCUnlockRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scApprove(SCApproveRequest requestBody) {
 
         return given().log().all()
                 .spec(restHelper.getSpec())

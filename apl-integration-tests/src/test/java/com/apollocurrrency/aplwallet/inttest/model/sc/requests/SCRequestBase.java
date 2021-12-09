@@ -7,23 +7,23 @@ import java.util.List;
 
 public class SCRequestBase implements ISCWrite {
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String address;
+    protected String address;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String name;
+    protected String name;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String sender;
+    protected String sender;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    List<String> params;
+    protected List<String> params;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String value;
+    protected String value;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String fuelPrice;
+    protected String fuelPrice;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String fuelLimit;
+    protected String fuelLimit;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String source;
+    protected String source;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String secretPhrase;
+    protected String secretPhrase;
 
 
 

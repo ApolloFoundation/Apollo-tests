@@ -1,4 +1,4 @@
-package com.apollocurrrency.aplwallet.inttest.model.sc.requests;
+package com.apollocurrrency.aplwallet.inttest.model.sc.requests.write;
 
 import java.util.ArrayList;
 import java.util.List;

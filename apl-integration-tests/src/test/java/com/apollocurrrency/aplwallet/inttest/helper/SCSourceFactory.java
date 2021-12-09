@@ -10,17 +10,22 @@ public class SCSourceFactory {
         String source = null;
         String atomCap =  String.valueOf(Long.parseLong(cap) * 100000000L);
         String atomInitSupply =  String.valueOf(Long.parseLong(initSupply) * 100000000L);
-        String atomRate = String.valueOf(Float.valueOf(Float.parseFloat(rate) * 100000000L).longValue());
+        String atomRate = String.valueOf(Double.valueOf(Double.parseDouble(rate) * 100000000L).longValue());
 
         switch (type) {
             case APL20_PERSONAL_LOCKABLE:
                  source =  String.format("class MyAPL20PersonalLockable extends APL20PersonalLockable {\n      constructor(){\n       super('%s','%s','%s','%s','%s','0','0x67c5363f4019c423');\n      }\n    }",
                          name,symbol,atomCap,atomInitSupply,atomRate) ;
-                break;
+                 break;
 
         }
 
         return source;
+    }
+
+    public String createSCSCSource(SCType type,String name) {
+              return "class MyTokenEscrow extends TokenEscrow {\n      constructor(){\n          super();\n      }\n    }";
+
     }
 
 }

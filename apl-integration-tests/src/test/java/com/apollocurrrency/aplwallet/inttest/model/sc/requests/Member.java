@@ -1,5 +1,7 @@
 package com.apollocurrrency.aplwallet.inttest.model.sc.requests;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +12,6 @@ public class Member {
 
     public Member(String function) {
         this.function = function;
-    }
-
-    public Member() {
     }
 
     public String getFunction() {

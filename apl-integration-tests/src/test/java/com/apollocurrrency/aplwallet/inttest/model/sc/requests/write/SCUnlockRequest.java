@@ -1,6 +1,8 @@
-package com.apollocurrrency.aplwallet.inttest.model.sc.requests;
+package com.apollocurrrency.aplwallet.inttest.model.sc.requests.write;
 
-public class SCUnlockRequest extends SCRequestBase{
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SCRequestBase;
+
+public class SCUnlockRequest extends SCRequestBase {
 
     public SCUnlockRequest(String address, String sender, String secretPhrase) {
         this.address = address;

@@ -4,6 +4,9 @@ import java.util.List;
 
 public class TrxResponse {
     private String protocol;
+    private String newErrorCode;
+    private String errorDetails;
+    private String errorDescription;
     private int requestProcessingTime;
     private String tx;
     private List<Result> results;
@@ -38,5 +41,29 @@ public class TrxResponse {
 
     public void setResults(List<Result> results) {
         this.results = results;
+    }
+
+    public String getNewErrorCode() {
+        return newErrorCode;
+    }
+
+    public void setNewErrorCode(String newErrorCode) {
+        this.newErrorCode = newErrorCode;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
     }
 }

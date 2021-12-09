@@ -1,4 +1,7 @@
-package com.apollocurrrency.aplwallet.inttest.model.sc.requests;
+package com.apollocurrrency.aplwallet.inttest.model.sc.requests.read;
+
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.Member;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SCRequestBase;
 
 import java.util.ArrayList;
 import java.util.List;

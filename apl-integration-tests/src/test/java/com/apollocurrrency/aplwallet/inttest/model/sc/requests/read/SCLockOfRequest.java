@@ -1,9 +1,12 @@
-package com.apollocurrrency.aplwallet.inttest.model.sc.requests;
+package com.apollocurrrency.aplwallet.inttest.model.sc.requests.read;
+
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.Member;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SCRequestBase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SCLockOfRequest extends SCRequestBase{
+public class SCLockOfRequest extends SCRequestBase {
     private List<Member> members = new ArrayList<>();
 
     public SCLockOfRequest(String address,String account) {
