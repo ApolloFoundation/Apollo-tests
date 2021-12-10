@@ -10,10 +10,7 @@ import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCAllowanceO
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCBalanceOfRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCLockOfRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCTotalSupplyRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.CreateSmartContract;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCApproveRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCBuyRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCUnlockRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.*;
 import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +59,7 @@ public class SmartContracts extends TestBaseNew {
         verifyTransactionInBlock(trxId);
 
         TransactionDTO sc = getTransaction(trxId);
+        String scHex = getConvertId(sc.getRecipientRS()).getHex();
 
         verifyBalanceOf(convertToAtom(init), sc.getRecipientRS(),"0xfd1ba38548944743");
 
@@ -100,20 +98,6 @@ public class SmartContracts extends TestBaseNew {
         verifyTotalSupply(totalSupply,sc.getRecipientRS());
 
 
-        SCApproveRequest scApproveRequest = new SCApproveRequest(
-                sc.getRecipientRS(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
-                convertToAtom(allowanceAmount),
-                "0x67c5363f4019c423",
-                TestConfiguration.getTestConfiguration().getStandartWallet().getPass());
-
-        TrxResponse approveResponse = scApprove(scApproveRequest);
-        trxId = broadcastTransaction(approveResponse.getTx()).getTransaction();
-        verifyTransactionInBlock(trxId);
-
-        verifyAllowance(convertToAtom(allowanceAmount),sc.getRecipientRS(),"0xfd1ba38548944743","0x67c5363f4019c423");
-
-
         source = sourceFactory.createSCSCSource(SCType.ESCROW,name);
         smartContract = new CreateSmartContract(
                 "MyTokenEscrow",
@@ -127,6 +111,40 @@ public class SmartContracts extends TestBaseNew {
         trxResponse =  createSC(smartContract);
         trxId = broadcastTransaction(trxResponse.getTx()).getTransaction();
         verifyTransactionInBlock(trxId);
+
+        TransactionDTO scEscrow = getTransaction(trxId);
+        String scEscrowHex = getConvertId(scEscrow.getRecipientRS()).getHex();
+
+
+
+        SCApproveRequest scApproveRequest = new SCApproveRequest(
+                sc.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                convertToAtom(allowanceAmount),
+                scEscrowHex,
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass());
+
+        TrxResponse approveResponse = scApprove(scApproveRequest);
+        trxId = broadcastTransaction(approveResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyAllowance(convertToAtom(allowanceAmount),sc.getRecipientRS(),"0xfd1ba38548944743",scEscrowHex);
+
+
+        SCDepositEscrow scDepositEscrowReq = new SCDepositEscrow(
+                scEscrow.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                "0x67c5363f4019c423",
+                scHex,
+                convertToAtom(allowanceAmount));
+
+        TrxResponse depositResponse = scDepositEscrow(scDepositEscrowReq);
+        trxId = broadcastTransaction(depositResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyBalanceOf(convertToAtom(allowanceAmount),sc.getRecipientRS(),scEscrowHex);
+
 
 
     }

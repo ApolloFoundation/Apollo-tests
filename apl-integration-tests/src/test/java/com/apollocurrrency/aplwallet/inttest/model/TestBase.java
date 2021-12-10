@@ -328,6 +328,7 @@ public abstract class TestBase {
                     TransactionDTO trx =  getTransaction(transaction);
                     log.info("Waiting for confirmation trx: {}", transaction);
                     assertNotNull(trx.getTransaction(),"Transactions removed from the mempool");
+                    assertNull(trx.getErrorMessage(),"Error msg: " + trx.getErrorMessage());
                     return trx.getConfirmations() >= 0;});
             } catch (Exception e) {
                 fail("Transaction doesn't add to block. Transaction " + transaction + " Exception: " + e.getMessage());
