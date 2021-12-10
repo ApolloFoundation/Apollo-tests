@@ -69,13 +69,17 @@ import com.apollocurrency.aplwallet.api.response.TransactionListResponse;
 import com.apollocurrency.aplwallet.api.response.VaultWalletResponse;
 import com.apollocurrency.aplwallet.api.response.WithdrawResponse;
 
+import com.apollocurrency.aplwallet.apl.crypto.Convert;
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
-import com.apollocurrrency.aplwallet.inttest.model.sc.ConvertId;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SmartContract;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCAllowanceOfRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCBalanceOfRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCLockOfRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCTotalSupplyRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.*;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCApproveRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCBuyRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCDepositEscrow;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCUnlockRequest;
 import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.qameta.allure.Step;
@@ -85,6 +89,7 @@ import net.jodah.failsafe.Failsafe;
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
@@ -104,7 +109,7 @@ public class TestBaseNew extends TestBase {
     @Step
     @DisplayName("Get Transaction")
     public TransactionDTO getTransaction(String transaction) {
-        HashMap<String, String> param = new HashMap();
+        HashMap<String, String> param = new HashMap<>();
         param.put(ReqType.REQUEST_TYPE, ReqType.GET_TRANSACTION);
         param.put(ReqParam.TRANSACTION, transaction);
 
@@ -2393,11 +2398,11 @@ public class TestBaseNew extends TestBase {
 
     @Step
     public CreateTransactionResponse broadcastTransaction(String transactionBytes) {
-        HashMap<String, String> param = new HashMap();
+        HashMap<String, String> param = new HashMap<>();
         param.put(ReqType.REQUEST_TYPE, ReqType.BROADCAST_TRANSACTION);
         param.put(ReqParam.TRANSACTION_BYTES, transactionBytes);
 
-        return given().log().all()
+        var rc = given().log().all()
                 .spec(restHelper.getSpec())
                 .contentType(ContentType.URLENC)
                 .formParams(param)
@@ -2408,6 +2413,9 @@ public class TestBaseNew extends TestBase {
                 .assertThat().statusCode(200)
                 .extract().body().jsonPath()
                 .getObject("", CreateTransactionResponse.class);
+
+        assertTrue(rc.errorCode==null || rc.errorCode==0, rc.errorDescription);
+        return rc;
     }
 
     @Step
@@ -3131,7 +3139,7 @@ public class TestBaseNew extends TestBase {
 
 
     @Step
-    public TrxResponse createSC(CreateSmartContract requestBody) {
+    public TrxResponse createSC(SmartContract requestBody) {
           return given().log().all()
                 .spec(restHelper.getSpec())
                 .contentType(ContentType.JSON)
@@ -3281,24 +3289,4 @@ public class TestBaseNew extends TestBase {
                 .getObject("", TrxResponse.class);
 
     }
-
-
-
-
-    @Step
-    public ConvertId getConvertId(String id) {
-
-        return given().log().all()
-                .spec(restHelper.getSpec())
-                .contentType(ContentType.JSON)
-                .when()
-                .get("/rest/v2/smc/debug/" + id)
-                .then()
-                .log().all()
-                .assertThat().statusCode(200)
-                .extract().body().jsonPath()
-                .getObject("", ConvertId.class);
-
-    }
-
 }

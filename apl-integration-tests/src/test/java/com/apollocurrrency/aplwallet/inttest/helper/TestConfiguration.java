@@ -49,7 +49,7 @@ public class TestConfiguration {
             testNetIp = mapper.readValue(jsonObject.get("net").toString(), typeRef);
             Random rand = new Random();
             env = System.getProperty("test.env");
-            if (!env.equals("") && !env.equals(host)) {
+            if (!env.equals("") && !env.equals(host) && testNetIp.get(env) != null) {
                 peers = testNetIp.get(env).getPeers();
                 host = peers.get(rand.nextInt(peers.size()));
                 System.out.println(host);

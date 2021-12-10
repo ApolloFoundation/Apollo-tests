@@ -1,7 +1,5 @@
 package com.apollocurrrency.aplwallet.inttest.model;
 
-
-import com.apollocurrency.aplwallet.api.dto.account.AccountDTO;
 import com.apollocurrency.aplwallet.api.dto.BalanceDTO;
 import com.apollocurrency.aplwallet.api.dto.BlockchainInfoDTO;
 import com.apollocurrency.aplwallet.api.dto.ForgingDetails;
@@ -9,6 +7,7 @@ import com.apollocurrency.aplwallet.api.dto.TransactionDTO;
 import com.apollocurrency.aplwallet.api.response.CreateTransactionResponse;
 import com.apollocurrency.aplwallet.api.response.ForgingResponse;
 import com.apollocurrency.aplwallet.api.response.GetPeersIpResponse;
+import com.apollocurrency.aplwallet.apl.crypto.Convert;
 import com.apollocurrrency.aplwallet.inttest.helper.RestHelper;
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
 import com.google.common.collect.ImmutableMap;
@@ -20,7 +19,6 @@ import io.restassured.http.ContentType;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.apache.http.params.CoreConnectionPNames;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -40,25 +39,29 @@ import java.util.concurrent.TimeUnit;
 import static com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration.getTestConfiguration;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ;
 import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
+import static org.testng.Assert.assertNull;
 
 
 public abstract class TestBase {
     public static final Logger log = LoggerFactory.getLogger(TestBase.class);
+    public static final BigInteger ONE_APL = BigInteger.TEN.pow(8);
+
     public static RetryPolicy retryPolicy = new RetryPolicy()
-        .retryWhen(false)
-        .withMaxRetries(20)
-        .withDelay(10, TimeUnit.SECONDS);
+            .retryWhen(false)
+            .withMaxRetries(20)
+            .withDelay(10, TimeUnit.SECONDS);
     static RestHelper restHelper = RestHelper.getRestHelper();
 
     private TestInfo testInfo;
-    private static RestAssuredConfig  config = RestAssured.config()
+    private static final RestAssuredConfig REST_ASSURED_CONFIG = RestAssured.config()
         .httpClient(HttpClientConfig.httpClientConfig()
             .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000)
             .setParam(CoreConnectionPNames.SO_TIMEOUT, 10000));
-    private String path = "/apl";
 
     @BeforeAll
     public synchronized static void initAll() {
@@ -236,7 +239,7 @@ public abstract class TestBase {
                 HashMap<String, String> param = new HashMap();
                 param.put(ReqType.REQUEST_TYPE, ReqType.GET_BLOCKCHAIN_STATUS);
                 path = "/apl";
-                BlockchainInfoDTO status = given().config(config).log().all()
+                BlockchainInfoDTO status = given().config(REST_ASSURED_CONFIG).log().all()
                         .spec(restHelper.getPreconditionSpec())
                         .contentType(ContentType.URLENC)
                         .formParams(param)
@@ -268,7 +271,7 @@ public abstract class TestBase {
                     param.put(ReqParam.ADMIN_PASSWORD, getTestConfiguration().getAdminPass());
                     path = "/apl";
                  try {
-                       ForgingResponse forgingResponse = given().config(config).log().all()
+                       ForgingResponse forgingResponse = given().config(REST_ASSURED_CONFIG).log().all()
                                 .baseUri(String.format("http://%s:%s", ip, 7876))
                                 .contentType(ContentType.URLENC)
                                 .formParams(param)
@@ -347,6 +350,7 @@ public abstract class TestBase {
         param.put(ReqType.REQUEST_TYPE, ReqType.GET_TRANSACTION);
         param.put(ReqParam.TRANSACTION, transaction);
 
+        String path = "/apl";
         return given()
             .spec(restHelper.getSpec())
             .contentType(ContentType.URLENC)
@@ -360,8 +364,19 @@ public abstract class TestBase {
     }
 
     public String convertToAtom(String value){
-        return String.valueOf(Long.parseLong(value) * 100000000L);
+        return new BigInteger(value).multiply(ONE_APL).toString();
     }
 
+    public String convertToAtom(long value){
+        return toAtm(value);
+    }
+
+    public String toAtm(long value) {
+        return BigInteger.valueOf(value).multiply(ONE_APL).toString();
+    }
+
+    public String convertAccountIdToHex(String id) {
+        return "0x"+ Convert.toHexString(Convert.parseAccountId(id));
+    }
 
 }
