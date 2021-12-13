@@ -69,17 +69,10 @@ import com.apollocurrency.aplwallet.api.response.TransactionListResponse;
 import com.apollocurrency.aplwallet.api.response.VaultWalletResponse;
 import com.apollocurrency.aplwallet.api.response.WithdrawResponse;
 
-import com.apollocurrency.aplwallet.apl.crypto.Convert;
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SmartContract;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCAllowanceOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCBalanceOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCLockOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCTotalSupplyRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCApproveRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCBuyRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCDepositEscrow;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.SCUnlockRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.*;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.*;
 import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.qameta.allure.Step;
@@ -89,7 +82,6 @@ import net.jodah.failsafe.Failsafe;
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
@@ -3240,6 +3232,23 @@ public class TestBaseNew extends TestBase {
     }
 
     @Step
+    public TrxResponse scFreezeOf(SCFreezeOfRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/read")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
     public TrxResponse scUnlockTokens(SCUnlockRequest requestBody) {
 
         return given().log().all()
@@ -3275,6 +3284,91 @@ public class TestBaseNew extends TestBase {
 
     @Step
     public TrxResponse scDepositEscrow(SCDepositEscrow requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+
+    @Step
+    public TrxResponse scWithdrawEscrow(SCWithdrawEscrowRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scTransfer(SCTransferRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scBurn(SCBurnRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+
+    @Step
+    public TrxResponse scFreeze(SCFreezeRequest requestBody) {
+
+        return given().log().all()
+                .spec(restHelper.getSpec())
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("rest/v2/smc/method/call")
+                .then()
+                .log().all()
+                .assertThat().statusCode(200)
+                .extract().body().jsonPath()
+                .getObject("", TrxResponse.class);
+
+    }
+    @Step
+    public TrxResponse scUnfreeze(SCUnfreezeRequest requestBody) {
 
         return given().log().all()
                 .spec(restHelper.getSpec())

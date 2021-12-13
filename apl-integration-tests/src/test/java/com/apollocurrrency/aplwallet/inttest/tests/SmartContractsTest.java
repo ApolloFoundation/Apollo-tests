@@ -7,10 +7,7 @@ import com.apollocurrrency.aplwallet.inttest.model.TestBaseNew;
 import com.apollocurrrency.aplwallet.inttest.model.Wallet;
 import com.apollocurrrency.aplwallet.inttest.model.sc.SCType;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SmartContract;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCAllowanceOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCBalanceOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCLockOfRequest;
-import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.SCTotalSupplyRequest;
+import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.*;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.write.*;
 import com.apollocurrrency.aplwallet.inttest.model.sc.response.TrxResponse;
 import io.qameta.allure.Description;
@@ -75,7 +72,7 @@ class SmartContractsTest extends TestBaseNew {
                 "INT_TEST-"+rateStr, "INT",toAtm(1000),toAtm(init),""+rate,"1","0x67c5363f4019c423");
 
         SmartContract smartContract = SmartContract.builder()
-                .name("MyAPL20PersonalLockable")
+                .name(SCType.APL20_PERSONAL_LOCKABLE.getContractName())
                 .sender(TestConfiguration.getTestConfiguration().getStandartWallet().getUser())
                 .value("0")
                 .fuelPrice("10000")
@@ -106,9 +103,10 @@ class SmartContractsTest extends TestBaseNew {
 
         verifyTransactionInBlock(trxId);
 
-        long balanceLockOfATM = buyAmountAPL*rate;
+        long balanceLockOfATM = buyAmountAPL * rate;
         verifyLockOf(""+balanceLockOfATM, sc.getRecipientRS(),"0xfd1ba38548944743");
 
+        //UNLOCK
         SCUnlockRequest scUnlockRequest = new SCUnlockRequest(
                 sc.getRecipientRS(),
                 TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
@@ -121,11 +119,43 @@ class SmartContractsTest extends TestBaseNew {
 
         verifyLockOf(toAtm(0),sc.getRecipientRS(),"0xfd1ba38548944743");
 
-        long balanceOf = balanceLockOfATM + init*100000000L;
+        long balanceOf = balanceLockOfATM + init * 100000000L;
         verifyBalanceOf((""+balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
-
         verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
 
+
+        //FREEZE
+        SCFreezeRequest scFreezeRequest = new SCFreezeRequest(
+                sc.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                String.valueOf(balanceOf));
+
+        TrxResponse freezeResponse = scFreeze(scFreezeRequest);
+        trxId = broadcastTransaction(freezeResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyFreezeOf(String.valueOf(balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyBalanceOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyTotalSupply(String.valueOf(balanceOf),sc.getRecipientRS());
+
+        //UNFREEZE
+        SCUnfreezeRequest scUnfreezeRequest = new SCUnfreezeRequest(
+                sc.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                String.valueOf(balanceOf));
+
+        TrxResponse unfreezeResponse = scUnfreeze(scUnfreezeRequest);
+        trxId = broadcastTransaction(unfreezeResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyFreezeOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyBalanceOf(String.valueOf(balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyTotalSupply(String.valueOf(balanceOf),sc.getRecipientRS());
+
+
+        //ESCROW
         source = SCSourceFactory.createSCSCSource(SCType.ESCROW);
         smartContract = SmartContract.builder()
                 .name("MyTokenEscrow")
@@ -144,6 +174,7 @@ class SmartContractsTest extends TestBaseNew {
         TransactionDTO scEscrow = getTransaction(trxId);
         String scEscrowHex = convertAccountIdToHex(scEscrow.getRecipientRS());
 
+        //APPROVE
         SCApproveRequest scApproveRequest = new SCApproveRequest(
                 sc.getRecipientRS(),
                 TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
@@ -157,6 +188,7 @@ class SmartContractsTest extends TestBaseNew {
 
         verifyAllowance(convertToAtom(allowanceAmount),sc.getRecipientRS(),"0xfd1ba38548944743",scEscrowHex);
 
+        //DEPOSIT
         SCDepositEscrow scDepositEscrowReq = new SCDepositEscrow(
                 scEscrow.getRecipientRS(),
                 TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
@@ -170,6 +202,68 @@ class SmartContractsTest extends TestBaseNew {
         verifyTransactionInBlock(trxId);
 
         verifyBalanceOf(convertToAtom(allowanceAmount),sc.getRecipientRS(),scEscrowHex);
+
+        //WITHDRAW
+        SCWithdrawEscrowRequest scWithdrawEscrowReq = new SCWithdrawEscrowRequest(
+                scEscrow.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                "0x67c5363f4019c423",
+                scHex);
+
+        TrxResponse withdrawResponse = scWithdrawEscrow(scWithdrawEscrowReq);
+        trxId = broadcastTransaction(withdrawResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+
+        verifyBalanceOf(convertToAtom(allowanceAmount),sc.getRecipientRS(),"0x67c5363f4019c423");
+        verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
+
+
+
+        SCTransferRequest scTransferRequest = new SCTransferRequest(
+                sc.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                scHex,
+                convertToAtom(buyAmountAPL));
+
+        TrxResponse scTransferResponse = scTransfer(scTransferRequest);
+        trxId = broadcastTransaction(scTransferResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyBalanceOf(convertToAtom(buyAmountAPL),sc.getRecipientRS(),scHex);
+        verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
+
+
+
+
+        SCBalanceOfRequest balanceReq = new SCBalanceOfRequest(sc.getRecipientRS(),"0xfd1ba38548944743");
+        var currentBalance =  balanceOf(balanceReq).getResults().get(0).getOutput().get(0);
+        balanceOf = balanceOf - Long.parseLong(currentBalance);
+
+
+        SCBurnRequest scBurnRequest = new SCBurnRequest(
+                sc.getRecipientRS(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                currentBalance);
+
+        TrxResponse scBurnRequestResponse = scBurn(scBurnRequest);
+        trxId = broadcastTransaction(scBurnRequestResponse.getTx()).getTransaction();
+        verifyTransactionInBlock(trxId);
+
+        verifyBalanceOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
+        verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
+
+
+
+
+    }
+
+    void verifyFreezeOf(String expectedResult, String scAddress,String account){
+        SCFreezeOfRequest balanceReq = new SCFreezeOfRequest(scAddress,account);
+        chekResponse(expectedResult, scFreezeOf(balanceReq));
     }
 
     void verifyBalanceOf(String expectedResult, String scAddress,String account){
@@ -206,9 +300,9 @@ class SmartContractsTest extends TestBaseNew {
     }
 
     private static Stream<Arguments> generateArgs(List<String> typesOfCurr){
-        List<Wallet> wallets = Arrays.asList(
-                TestConfiguration.getTestConfiguration().getStandartWallet(),
-                TestConfiguration.getTestConfiguration().getVaultWallet());
+        List<SCType> wallets = Arrays.asList(
+                SCType.APL20_PERSONAL_LOCKABLE,
+                SCType.APL20_LOCK);
         List<Arguments> arguments = new ArrayList<>();
         typesOfCurr.forEach(type-> wallets.forEach(wallet ->arguments.add(Arguments.of(type, wallet))));
         return arguments.stream();
