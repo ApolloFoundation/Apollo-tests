@@ -79,6 +79,7 @@ public class TestDex extends TestBaseNew {
         return isStatus;
     }
 
+
     @Step
     private boolean waitEmptyActiveOrders(String ethWallet){
         log.info("Wait For ETh wallet empty: {}", ethWallet);

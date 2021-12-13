@@ -2724,6 +2724,20 @@ public class TestBaseNew extends TestBase {
         return isHeight;
     }
 
+
+    @Step
+    public boolean waitForSCLockTime(long timeStamp){
+        log.info("Wait For Time: {}", timeStamp);
+        boolean isHeight = false;
+        try {
+            isHeight = Failsafe.with(retryPolicy).get(() -> getBlock().getTimestamp() >= timeStamp);
+        } catch (Exception e) {
+            fail(String.format("Time %s  not reached. Exception msg: %s", timeStamp, e.getMessage()));
+        }
+        assertTrue(isHeight, String.format("Time %s not reached: %s", timeStamp, getBlock().getHeight()));
+        return isHeight;
+    }
+
     @Step
     public CreateTransactionResponse dgsDelisting(Wallet wallet, String transaction) {
         HashMap<String, String> param = new HashMap();

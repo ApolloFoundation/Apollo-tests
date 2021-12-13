@@ -39,12 +39,10 @@ import java.util.concurrent.TimeUnit;
 import static com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration.getTestConfiguration;
 import static com.github.automatedowl.tools.AllureEnvironmentWriter.allureEnvironmentWriter;
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ;
 import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
-import static org.testng.Assert.assertNull;
+
 
 
 public abstract class TestBase {
@@ -325,6 +323,7 @@ public abstract class TestBase {
     public boolean verifyTransactionInBlock(String transaction) {
         boolean inBlock = false;
         log.info("trx id: {}",transaction);
+
         if (transaction != null) {
             try {
                 inBlock = Failsafe.with(retryPolicy).get(() -> {
@@ -342,6 +341,10 @@ public abstract class TestBase {
         }
         return inBlock;
     }
+
+
+
+
 
     @Step
     @DisplayName("Get Transaction")

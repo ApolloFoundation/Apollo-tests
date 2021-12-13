@@ -4,7 +4,6 @@ import com.apollocurrency.aplwallet.api.dto.TransactionDTO;
 import com.apollocurrrency.aplwallet.inttest.helper.SCSourceFactory;
 import com.apollocurrrency.aplwallet.inttest.helper.TestConfiguration;
 import com.apollocurrrency.aplwallet.inttest.model.TestBaseNew;
-import com.apollocurrrency.aplwallet.inttest.model.Wallet;
 import com.apollocurrrency.aplwallet.inttest.model.sc.SCType;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.SmartContract;
 import com.apollocurrrency.aplwallet.inttest.model.sc.requests.read.*;
@@ -18,21 +17,26 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.testng.Assert.assertNull;
+
 
 @Slf4j
 class SmartContractsTest extends TestBaseNew {
 
+
     @DisplayName("Publish Suspicious smart-contract")
     @Test
     void publishSuspiciousContract(){
+
         String source = "class MyAPL20PersonalLockable extends APL20PersonalLockable {\n" +
                 "  constructor(){\n" +
                 "      super(WrongTokenName,'WRG','1000','50','1','0','0x67c5363f4019c423');\n" +
@@ -56,23 +60,36 @@ class SmartContractsTest extends TestBaseNew {
 
         TransactionDTO sc = getTransaction(trxId);
         assertNotNull(sc);
+
+
     }
 
     @DisplayName("Create SC")
     @Description("Create SC")
-    @ParameterizedTest(name = "{displayName} rate: {0}")
-    @MethodSource("scRate")
-    void createSc(String rateStr){
+    @ParameterizedTest(name = "{displayName} rate: {0} SC Type: {1}")
+    @MethodSource("scTestParameters")
+    void createSc(String rateStr,SCType scType){
         //sender = APL-AKU5-JP6B-Y42V-H5X8U  0xfd1ba38548944743
         //vault  = APL-MK35-9X23-YQ5E-8QBKH  0x67c5363f4019c423
         long init = 50;
+        long cap = 10000;
         var rate = Double.valueOf(Double.parseDouble(rateStr)*100000000L).longValue();
 
-        String source = SCSourceFactory.createSCSCSource(SCType.APL20_PERSONAL_LOCKABLE,
-                "INT_TEST-"+rateStr, "INT",toAtm(1000),toAtm(init),""+rate,"1","0x67c5363f4019c423");
+        String source = SCSourceFactory.createSCSCSource(scType, "INT_TEST-" + rateStr + " " + scType.getBaseContract(), "INT",toAtm(cap),toAtm(init),String.valueOf(rate),"0x67c5363f4019c423");
+
+        switch (scType){
+            case APL20_PERSONAL_LOCKABLE:
+                source = SCSourceFactory.createSCSCSource(scType,
+                        "INT_TEST-"+rateStr + " " + scType.getBaseContract(), "INT",toAtm(cap),toAtm(init),String.valueOf(rate),"1","0x67c5363f4019c423");
+                break;
+            case APL20_LOCK:
+                source = SCSourceFactory.createSCSCSource(scType,
+                        "INT_TEST-" + rateStr + " " + scType.getBaseContract(), "INT",toAtm(cap),toAtm(init),String.valueOf(rate),String.valueOf(Instant.now().plus(3, ChronoUnit.SECONDS).toEpochMilli()),"0x67c5363f4019c423");
+                break;
+        }
 
         SmartContract smartContract = SmartContract.builder()
-                .name(SCType.APL20_PERSONAL_LOCKABLE.getContractName())
+                .name(scType.getContractName())
                 .sender(TestConfiguration.getTestConfiguration().getStandartWallet().getUser())
                 .value("0")
                 .fuelPrice("10000")
@@ -104,55 +121,58 @@ class SmartContractsTest extends TestBaseNew {
         verifyTransactionInBlock(trxId);
 
         long balanceLockOfATM = buyAmountAPL * rate;
-        verifyLockOf(""+balanceLockOfATM, sc.getRecipientRS(),"0xfd1ba38548944743");
+        long balanceOf = balanceLockOfATM + init * 100000000L;
 
         //UNLOCK
-        SCUnlockRequest scUnlockRequest = new SCUnlockRequest(
-                sc.getRecipientRS(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getPass());
+        if (scType == SCType.APL20_PERSONAL_LOCKABLE || scType == SCType.APL20_LOCK) {
 
-        TrxResponse unlockResponse = scUnlockTokens(scUnlockRequest);
-        trxId = broadcastTransaction(unlockResponse.getTx()).getTransaction();
+            verifyLockOf(""+balanceLockOfATM, sc.getRecipientRS(),"0xfd1ba38548944743");
 
-        verifyTransactionInBlock(trxId);
+            SCUnlockRequest scUnlockRequest = new SCUnlockRequest(
+                    sc.getRecipientRS(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getPass());
 
-        verifyLockOf(toAtm(0),sc.getRecipientRS(),"0xfd1ba38548944743");
+            TrxResponse unlockResponse = scUnlockTokens(scUnlockRequest);
+            trxId = broadcastTransaction(unlockResponse.getTx()).getTransaction();
 
-        long balanceOf = balanceLockOfATM + init * 100000000L;
-        verifyBalanceOf((""+balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
+            verifyTransactionInBlock(trxId);
+            verifyLockOf(toAtm(0), sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyBalanceOf(("" + balanceOf), sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyTotalSupply(("" + balanceOf), sc.getRecipientRS());
+        }
 
+        if (scType == SCType.APL20_PERSONAL_LOCKABLE || scType == SCType.APL20_LOCK || scType == SCType.APL20_FREEZE) {
+            //FREEZE
+            SCFreezeRequest scFreezeRequest = new SCFreezeRequest(
+                    sc.getRecipientRS(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                    String.valueOf(balanceOf));
 
-        //FREEZE
-        SCFreezeRequest scFreezeRequest = new SCFreezeRequest(
-                sc.getRecipientRS(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
-                String.valueOf(balanceOf));
+            TrxResponse freezeResponse = scFreeze(scFreezeRequest);
+            trxId = broadcastTransaction(freezeResponse.getTx()).getTransaction();
+            verifyTransactionInBlock(trxId);
 
-        TrxResponse freezeResponse = scFreeze(scFreezeRequest);
-        trxId = broadcastTransaction(freezeResponse.getTx()).getTransaction();
-        verifyTransactionInBlock(trxId);
+            verifyFreezeOf(String.valueOf(balanceOf), sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyBalanceOf("0", sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyTotalSupply(String.valueOf(balanceOf), sc.getRecipientRS());
 
-        verifyFreezeOf(String.valueOf(balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyBalanceOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyTotalSupply(String.valueOf(balanceOf),sc.getRecipientRS());
+            //UNFREEZE
+            SCUnfreezeRequest scUnfreezeRequest = new SCUnfreezeRequest(
+                    sc.getRecipientRS(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
+                    TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
+                    String.valueOf(balanceOf));
 
-        //UNFREEZE
-        SCUnfreezeRequest scUnfreezeRequest = new SCUnfreezeRequest(
-                sc.getRecipientRS(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getUser(),
-                TestConfiguration.getTestConfiguration().getStandartWallet().getPass(),
-                String.valueOf(balanceOf));
+            TrxResponse unfreezeResponse = scUnfreeze(scUnfreezeRequest);
+            trxId = broadcastTransaction(unfreezeResponse.getTx()).getTransaction();
+            verifyTransactionInBlock(trxId);
 
-        TrxResponse unfreezeResponse = scUnfreeze(scUnfreezeRequest);
-        trxId = broadcastTransaction(unfreezeResponse.getTx()).getTransaction();
-        verifyTransactionInBlock(trxId);
-
-        verifyFreezeOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyBalanceOf(String.valueOf(balanceOf),sc.getRecipientRS(),"0xfd1ba38548944743");
-        verifyTotalSupply(String.valueOf(balanceOf),sc.getRecipientRS());
+            verifyFreezeOf("0", sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyBalanceOf(String.valueOf(balanceOf), sc.getRecipientRS(), "0xfd1ba38548944743");
+            verifyTotalSupply(String.valueOf(balanceOf), sc.getRecipientRS());
+        }
 
 
         //ESCROW
@@ -256,10 +276,10 @@ class SmartContractsTest extends TestBaseNew {
         verifyBalanceOf("0",sc.getRecipientRS(),"0xfd1ba38548944743");
         verifyTotalSupply((""+balanceOf),sc.getRecipientRS());
 
-
-
-
     }
+
+
+
 
     void verifyFreezeOf(String expectedResult, String scAddress,String account){
         SCFreezeOfRequest balanceReq = new SCFreezeOfRequest(scAddress,account);
@@ -289,7 +309,6 @@ class SmartContractsTest extends TestBaseNew {
     private void chekResponse(String expectedResult, TrxResponse balanceResponse) {
         assertNotNull(expectedResult);
         assertNotNull(balanceResponse);
-        assertNull(balanceResponse.getNewErrorCode());
         var rc = balanceResponse.getResults().get(0).getOutput().get(0);
         log.info("Requested result={}", rc);
         assertEquals(expectedResult, (rc),"Result does not match");
@@ -299,10 +318,18 @@ class SmartContractsTest extends TestBaseNew {
          return Stream.of("1","0.1", "0.001", "0.00000001", "10");
     }
 
+    private static Stream<Arguments> scTestParameters() {
+        return generateArgs(Arrays.asList("1","0.1", "0.001", "0.00000001", "10"));
+    }
+
+
+
     private static Stream<Arguments> generateArgs(List<String> typesOfCurr){
         List<SCType> wallets = Arrays.asList(
                 SCType.APL20_PERSONAL_LOCKABLE,
-                SCType.APL20_LOCK);
+                SCType.APL20_LOCK,
+                SCType.APL20_FREEZE,
+                SCType.APL20_BUY);
         List<Arguments> arguments = new ArrayList<>();
         typesOfCurr.forEach(type-> wallets.forEach(wallet ->arguments.add(Arguments.of(type, wallet))));
         return arguments.stream();
